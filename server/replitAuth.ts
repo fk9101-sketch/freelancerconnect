@@ -86,6 +86,7 @@ export async function setupAuth(app: Express) {
 
   for (const domain of process.env
     .REPLIT_DOMAINS!.split(",")) {
+    console.log(`Setting up strategy for domain: ${domain}`);
     const strategy = new Strategy(
       {
         name: `replitauth:${domain}`,
@@ -96,21 +97,35 @@ export async function setupAuth(app: Express) {
       verify,
     );
     passport.use(strategy);
+    console.log(`Strategy registered: replitauth:${domain}`);
   }
 
   passport.serializeUser((user: Express.User, cb) => cb(null, user));
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
   app.get("/api/login", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, {
+    console.log(`Login request for hostname: ${req.hostname}`);
+    console.log(`Available strategies:`, passport._strategies);
+    
+    // Try to authenticate with the strategy for this hostname
+    const strategyName = `replitauth:${req.hostname}`;
+    console.log(`Attempting to use strategy: ${strategyName}`);
+    
+    if (!passport._strategy(strategyName)) {
+      console.error(`Strategy ${strategyName} not found`);
+      return res.status(500).json({ error: `Authentication strategy not configured for ${req.hostname}` });
+    }
+    
+    passport.authenticate(strategyName, {
       prompt: "login consent",
       scope: ["openid", "email", "profile", "offline_access"],
     })(req, res, next);
   });
 
   app.get("/api/callback", (req, res, next) => {
+    console.log(`Callback request for hostname: ${req.hostname}`);
     passport.authenticate(`replitauth:${req.hostname}`, {
-      successReturnToOrRedirect: "/",
+      successRedirect: "/",
       failureRedirect: "/api/login",
     })(req, res, next);
   });
