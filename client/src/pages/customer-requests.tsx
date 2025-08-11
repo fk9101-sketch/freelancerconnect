@@ -65,7 +65,7 @@ export default function CustomerRequests() {
   }
 
   return (
-    <div className="min-h-screen pb-20">
+    <div className="min-h-screen pb-20 bg-background text-foreground">
       {/* Status Bar */}
       <div className="status-bar">
         <span>9:41 AM</span>
@@ -77,19 +77,19 @@ export default function CustomerRequests() {
       </div>
 
       {/* Header */}
-      <div className="bg-gradient-purple text-white p-4">
-        <div className="flex items-center justify-between mb-4">
+      <div className="bg-gradient-purple text-white p-6">
+        <div className="flex items-center justify-between mb-6">
           <button 
             onClick={() => setLocation('/customer')}
-            className="text-white"
+            className="text-white hover:bg-white/15 p-3 rounded-2xl transition-colors backdrop-blur-sm"
             data-testid="button-back"
           >
             <i className="fas fa-arrow-left text-lg"></i>
           </button>
-          <h1 className="text-lg font-semibold">My Requests</h1>
+          <h1 className="text-xl font-bold">My Requests</h1>
           <button 
             onClick={() => setLocation('/post-job')}
-            className="text-white"
+            className="text-white hover:bg-white/15 p-3 rounded-2xl transition-colors backdrop-blur-sm"
             data-testid="button-add-request"
           >
             <i className="fas fa-plus text-lg"></i>
@@ -104,7 +104,7 @@ export default function CustomerRequests() {
               onClick={() => setFilter(status as any)}
               variant={filter === status ? "secondary" : "ghost"}
               size="sm"
-              className="whitespace-nowrap text-white border-white/20 capitalize"
+              className="whitespace-nowrap text-white border-white/20 capitalize hover:bg-white/10"
               data-testid={`filter-${status}`}
             >
               {status === 'all' ? 'All' : status}
@@ -114,21 +114,21 @@ export default function CustomerRequests() {
       </div>
 
       {/* Requests List */}
-      <div className="p-4">
+      <div className="p-6 bg-background">
         {filteredLeads.length === 0 ? (
-          <div className="text-center py-12">
-            <i className="fas fa-clipboard-list text-4xl text-gray-300 mb-4"></i>
-            <h3 className="text-lg font-semibold text-gray-600 mb-2">
+          <div className="text-center py-16">
+            <i className="fas fa-clipboard-list text-5xl text-muted-foreground mb-6"></i>
+            <h3 className="text-xl font-bold text-foreground mb-3">
               {filter === 'all' ? 'No Requests Yet' : `No ${filter} Requests`}
             </h3>
-            <p className="text-gray-500 text-sm mb-6">
+            <p className="text-muted-foreground text-sm mb-8 max-w-sm mx-auto">
               {filter === 'all' 
                 ? "Post your first job requirement to get started" 
                 : `You don't have any ${filter} requests`}
             </p>
             <Button
               onClick={() => setLocation('/post-job')}
-              className="bg-gradient-purple hover:opacity-90"
+              className="bg-gradient-purple hover:scale-105 transition-transform duration-200 shadow-lg"
               data-testid="button-post-first-job"
             >
               <i className="fas fa-plus mr-2"></i>
@@ -136,37 +136,37 @@ export default function CustomerRequests() {
             </Button>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-5">
             {filteredLeads.map((lead) => (
-              <div key={lead.id} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                <div className="flex items-start justify-between mb-3">
+              <div key={lead.id} className="bg-card rounded-2xl p-6 shadow-lg border border-border hover:shadow-xl transition-all duration-200">
+                <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
-                    <h4 className="font-semibold text-gray-900 mb-1" data-testid={`text-lead-title-${lead.id}`}>
+                    <h4 className="font-bold text-card-foreground mb-2" data-testid={`text-lead-title-${lead.id}`}>
                       {lead.title}
                     </h4>
-                    <p className="text-sm text-gray-600 mb-2">{lead.description}</p>
+                    <p className="text-sm text-muted-foreground mb-3">{lead.description}</p>
                   </div>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(lead.status)}`}>
+                  <span className={`px-3 py-1.5 rounded-full text-xs font-semibold ${getStatusColor(lead.status)}`}>
                     <i className={`${getStatusIcon(lead.status)} mr-1`}></i>
                     {lead.status}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 mb-3 text-sm text-gray-600">
-                  <div>
-                    <i className="fas fa-map-marker-alt mr-1 text-gray-400"></i>
+                <div className="grid grid-cols-2 gap-4 mb-4 text-sm text-muted-foreground">
+                  <div className="flex items-center">
+                    <i className="fas fa-map-marker-alt mr-2 text-primary"></i>
                     {lead.location}
                   </div>
-                  <div>
-                    <i className="fas fa-rupee-sign mr-1 text-gray-400"></i>
+                  <div className="flex items-center">
+                    <i className="fas fa-rupee-sign mr-2 text-primary"></i>
                     ₹{lead.budgetMin}-{lead.budgetMax}
                   </div>
-                  <div>
-                    <i className="fas fa-tag mr-1 text-gray-400"></i>
+                  <div className="flex items-center">
+                    <i className="fas fa-tag mr-2 text-primary"></i>
                     {lead.category.name}
                   </div>
-                  <div>
-                    <i className="fas fa-clock mr-1 text-gray-400"></i>
+                  <div className="flex items-center">
+                    <i className="fas fa-clock mr-2 text-primary"></i>
                     {new Date(lead.createdAt!).toLocaleDateString()}
                   </div>
                 </div>

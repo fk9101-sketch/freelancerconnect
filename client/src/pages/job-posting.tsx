@@ -158,7 +158,7 @@ export default function JobPosting() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 relative">
+    <div className="min-h-screen bg-background text-foreground relative">
       {/* Status Bar */}
       <div className="status-bar">
         <span>9:41 AM</span>
@@ -170,21 +170,21 @@ export default function JobPosting() {
       </div>
 
       {/* Header */}
-      <div className="bg-gradient-purple text-white p-4 flex items-center">
+      <div className="bg-gradient-purple text-white p-6 flex items-center">
         <Button
           variant="ghost"
           size="sm"
           onClick={handleGoBack}
-          className="mr-4 text-white hover:bg-white/10"
+          className="mr-4 text-white hover:bg-white/15 p-3 rounded-2xl backdrop-blur-sm"
           data-testid="button-go-back"
         >
           <i className="fas fa-arrow-left text-lg"></i>
         </Button>
-        <h2 className="text-lg font-semibold">Post a Job</h2>
+        <h2 className="text-xl font-bold">Post Your Requirement</h2>
       </div>
 
       {/* Form Content */}
-      <div className="p-4 pb-32">
+      <div className="p-6 pb-32 bg-background">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Category Selection */}
@@ -193,13 +193,13 @@ export default function JobPosting() {
               name="categoryId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="block text-sm font-medium text-on-surface">
+                  <FormLabel className="block text-sm font-semibold text-foreground mb-2">
                     Service Category
                   </FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger 
-                        className="w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-700 focus:border-primary focus:ring-primary"
+                        className="w-full bg-card border border-border rounded-2xl px-4 py-4 text-card-foreground focus:border-primary focus:ring-primary shadow-sm"
                         data-testid="select-category"
                       >
                         <SelectValue placeholder="Select a category" />
@@ -224,14 +224,14 @@ export default function JobPosting() {
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="block text-sm font-medium text-on-surface">
+                  <FormLabel className="block text-sm font-semibold text-foreground mb-2">
                     Job Title
                   </FormLabel>
                   <FormControl>
                     <Input
                       {...field}
                       placeholder="e.g., Fix ceiling fan"
-                      className="w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-700 focus:border-primary focus:ring-primary"
+                      className="w-full bg-card border border-border rounded-2xl px-4 py-4 text-card-foreground placeholder-muted-foreground focus:border-primary focus:ring-primary shadow-sm"
                       data-testid="input-job-title"
                     />
                   </FormControl>
@@ -246,7 +246,7 @@ export default function JobPosting() {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="block text-sm font-medium text-on-surface">
+                  <FormLabel className="block text-sm font-semibold text-foreground mb-2">
                     Description
                   </FormLabel>
                   <FormControl>
@@ -254,7 +254,7 @@ export default function JobPosting() {
                       {...field}
                       rows={4}
                       placeholder="Describe your requirements in detail..."
-                      className="w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-700 focus:border-primary focus:ring-primary"
+                      className="w-full bg-card border border-border rounded-2xl px-4 py-4 text-card-foreground placeholder-muted-foreground focus:border-primary focus:ring-primary shadow-sm"
                       data-testid="textarea-description"
                     />
                   </FormControl>
@@ -265,7 +265,7 @@ export default function JobPosting() {
 
             {/* Budget Range */}
             <div>
-              <FormLabel className="block text-sm font-medium text-on-surface mb-2">
+              <FormLabel className="block text-sm font-semibold text-foreground mb-3">
                 Budget Range
               </FormLabel>
               <div className="grid grid-cols-2 gap-3">
@@ -279,7 +279,7 @@ export default function JobPosting() {
                           {...field}
                           type="number"
                           placeholder="Min amount"
-                          className="border border-gray-300 rounded-xl px-4 py-3 text-gray-700 focus:border-primary focus:ring-primary"
+                          className="bg-card border border-border rounded-2xl px-4 py-4 text-card-foreground placeholder-muted-foreground focus:border-primary focus:ring-primary shadow-sm"
                           onChange={(e) => field.onChange(Number(e.target.value))}
                           data-testid="input-budget-min"
                         />
@@ -298,7 +298,7 @@ export default function JobPosting() {
                           {...field}
                           type="number"
                           placeholder="Max amount"
-                          className="border border-gray-300 rounded-xl px-4 py-3 text-gray-700 focus:border-primary focus:ring-primary"
+                          className="bg-card border border-border rounded-2xl px-4 py-4 text-card-foreground placeholder-muted-foreground focus:border-primary focus:ring-primary shadow-sm"
                           onChange={(e) => field.onChange(Number(e.target.value))}
                           data-testid="input-budget-max"
                         />
@@ -312,7 +312,7 @@ export default function JobPosting() {
 
             {/* Location */}
             <div>
-              <FormLabel className="block text-sm font-medium text-on-surface mb-2">
+              <FormLabel className="block text-sm font-semibold text-foreground mb-3">
                 Location
               </FormLabel>
               <FormField
@@ -325,11 +325,11 @@ export default function JobPosting() {
                         <Input
                           {...field}
                           placeholder="Enter your area or pincode"
-                          className="w-full border border-gray-300 rounded-xl px-4 py-3 pl-10 text-gray-700 focus:border-primary focus:ring-primary"
+                          className="w-full bg-card border border-border rounded-2xl px-4 py-4 pl-12 text-card-foreground placeholder-muted-foreground focus:border-primary focus:ring-primary shadow-sm"
                           data-testid="input-location"
                         />
                       </FormControl>
-                      <i className="fas fa-map-marker-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+                      <i className="fas fa-map-marker-alt absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground"></i>
                     </div>
                     <FormMessage />
                   </FormItem>
@@ -354,14 +354,14 @@ export default function JobPosting() {
               name="pincode"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="block text-sm font-medium text-on-surface">
+                  <FormLabel className="block text-sm font-semibold text-foreground mb-2">
                     Pincode (Optional)
                   </FormLabel>
                   <FormControl>
                     <Input
                       {...field}
                       placeholder="Enter pincode"
-                      className="w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-700 focus:border-primary focus:ring-primary"
+                      className="w-full bg-card border border-border rounded-2xl px-4 py-4 text-card-foreground placeholder-muted-foreground focus:border-primary focus:ring-primary shadow-sm"
                       data-testid="input-pincode"
                     />
                   </FormControl>
@@ -376,13 +376,13 @@ export default function JobPosting() {
               name="preferredTime"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="block text-sm font-medium text-on-surface">
+                  <FormLabel className="block text-sm font-semibold text-foreground mb-2">
                     Preferred Time
                   </FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger 
-                        className="w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-700 focus:border-primary focus:ring-primary"
+                        className="w-full bg-card border border-border rounded-2xl px-4 py-4 text-card-foreground focus:border-primary focus:ring-primary shadow-sm"
                         data-testid="select-preferred-time"
                       >
                         <SelectValue placeholder="Select preferred time" />
@@ -403,13 +403,13 @@ export default function JobPosting() {
 
             {/* Photo Upload Placeholder */}
             <div>
-              <FormLabel className="block text-sm font-medium text-on-surface mb-2">
+              <FormLabel className="block text-sm font-semibold text-foreground mb-3">
                 Photos (Optional)
               </FormLabel>
-              <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center">
-                <i className="fas fa-camera text-gray-400 text-2xl mb-2"></i>
-                <p className="text-gray-500 text-sm">Tap to add photos</p>
-                <p className="text-xs text-gray-400 mt-1">Photos help freelancers understand your requirements better</p>
+              <div className="border-2 border-dashed border-border rounded-2xl p-8 text-center bg-card/50 hover:bg-card/70 transition-colors cursor-pointer">
+                <i className="fas fa-camera text-primary text-3xl mb-3"></i>
+                <p className="text-card-foreground text-sm font-medium">Tap to add photos</p>
+                <p className="text-xs text-muted-foreground mt-2">Photos help freelancers understand your requirements better</p>
               </div>
             </div>
 
@@ -419,7 +419,7 @@ export default function JobPosting() {
 
       {/* Fixed Submit Button at Bottom */}
       <div 
-        className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 shadow-lg"
+        className="fixed bottom-0 left-0 right-0 p-6 bg-card/95 backdrop-blur-xl border-t border-border shadow-2xl"
         style={{ zIndex: 9999, position: 'fixed', bottom: 0 }}
       >
         <button
@@ -439,12 +439,7 @@ export default function JobPosting() {
             const formData = form.getValues();
             onSubmit(formData);
           }}
-          className="w-full text-white py-4 px-6 rounded-xl font-semibold text-lg hover:opacity-90 transition-opacity shadow-lg disabled:opacity-50"
-          style={{ 
-            background: 'linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%)',
-            border: 'none',
-            color: 'white'
-          }}
+          className="w-full bg-gradient-purple text-white py-5 px-6 rounded-2xl font-bold text-lg hover:scale-105 transition-all duration-200 shadow-2xl disabled:opacity-50 disabled:scale-100"
           data-testid="button-post-job"
         >
           {createLeadMutation.isPending ? (

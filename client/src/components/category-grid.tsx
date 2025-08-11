@@ -31,26 +31,26 @@ const getCategoryIcon = (categoryName: string): string => {
 
 const getCategoryColor = (categoryName: string): string => {
   const name = categoryName.toLowerCase();
-  if (name.includes('electric')) return 'bg-yellow-100 text-yellow-600';
-  if (name.includes('plumb')) return 'bg-blue-100 text-blue-600';
-  if (name.includes('carpen')) return 'bg-green-100 text-green-600';
-  if (name.includes('paint')) return 'bg-purple-100 text-primary';
-  if (name.includes('mechanic')) return 'bg-red-100 text-red-600';
-  if (name.includes('ac') || name.includes('appliance')) return 'bg-cyan-100 text-cyan-600';
-  if (name.includes('weld')) return 'bg-orange-100 text-orange-600';
-  if (name.includes('mason')) return 'bg-gray-100 text-gray-600';
-  if (name.includes('garden')) return 'bg-emerald-100 text-emerald-600';
-  if (name.includes('clean')) return 'bg-teal-100 text-teal-600';
-  if (name.includes('interior') || name.includes('design')) return 'bg-pink-100 text-pink-600';
-  if (name.includes('driver')) return 'bg-indigo-100 text-indigo-600';
-  if (name.includes('tutor')) return 'bg-violet-100 text-violet-600';
-  if (name.includes('photo')) return 'bg-slate-100 text-slate-600';
-  if (name.includes('makeup')) return 'bg-rose-100 text-rose-600';
-  if (name.includes('it') || name.includes('technician')) return 'bg-blue-100 text-blue-600';
-  if (name.includes('event')) return 'bg-amber-100 text-amber-600';
-  if (name.includes('pest')) return 'bg-lime-100 text-lime-600';
-  if (name.includes('mover') || name.includes('packer')) return 'bg-stone-100 text-stone-600';
-  return 'bg-gray-100 text-gray-600';
+  if (name.includes('electric')) return 'bg-yellow-500/20 text-yellow-400';
+  if (name.includes('plumb')) return 'bg-blue-500/20 text-blue-400';
+  if (name.includes('carpen')) return 'bg-green-500/20 text-green-400';
+  if (name.includes('paint')) return 'bg-purple-500/20 text-purple-400';
+  if (name.includes('mechanic')) return 'bg-red-500/20 text-red-400';
+  if (name.includes('ac') || name.includes('appliance')) return 'bg-cyan-500/20 text-cyan-400';
+  if (name.includes('weld')) return 'bg-orange-500/20 text-orange-400';
+  if (name.includes('mason')) return 'bg-gray-500/20 text-gray-400';
+  if (name.includes('garden')) return 'bg-emerald-500/20 text-emerald-400';
+  if (name.includes('clean')) return 'bg-teal-500/20 text-teal-400';
+  if (name.includes('interior') || name.includes('design')) return 'bg-pink-500/20 text-pink-400';
+  if (name.includes('driver')) return 'bg-indigo-500/20 text-indigo-400';
+  if (name.includes('tutor')) return 'bg-violet-500/20 text-violet-400';
+  if (name.includes('photo')) return 'bg-slate-500/20 text-slate-400';
+  if (name.includes('makeup')) return 'bg-rose-500/20 text-rose-400';
+  if (name.includes('it') || name.includes('technician')) return 'bg-blue-500/20 text-blue-400';
+  if (name.includes('event')) return 'bg-amber-500/20 text-amber-400';
+  if (name.includes('pest')) return 'bg-lime-500/20 text-lime-400';
+  if (name.includes('mover') || name.includes('packer')) return 'bg-stone-500/20 text-stone-400';
+  return 'bg-primary/20 text-primary';
 };
 
 export default function CategoryGrid({ categories, onCategorySelect }: CategoryGridProps) {
@@ -59,18 +59,18 @@ export default function CategoryGrid({ categories, onCategorySelect }: CategoryG
   const hasMore = categories.length > 5;
 
   return (
-    <div className="grid grid-cols-3 gap-3">
+    <div className="grid grid-cols-3 gap-4">
       {displayCategories.map((category) => (
         <div
           key={category.id}
           onClick={() => onCategorySelect(category.id)}
-          className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center cursor-pointer hover:shadow-md transition-shadow card-hover"
+          className="bg-card rounded-2xl p-5 shadow-lg border border-border text-center cursor-pointer hover:shadow-xl hover:scale-105 transition-all duration-200 card-hover"
           data-testid={`category-${category.id}`}
         >
-          <div className={`w-12 h-12 ${getCategoryColor(category.name)} rounded-xl flex items-center justify-center mx-auto mb-2`}>
+          <div className={`w-14 h-14 ${getCategoryColor(category.name)} rounded-2xl flex items-center justify-center mx-auto mb-3`}>
             <i className={`${getCategoryIcon(category.name)} text-xl`}></i>
           </div>
-          <p className="text-xs font-medium text-gray-700 leading-tight">
+          <p className="text-xs font-semibold text-card-foreground leading-tight">
             {category.name}
           </p>
         </div>
@@ -79,13 +79,13 @@ export default function CategoryGrid({ categories, onCategorySelect }: CategoryG
       {hasMore && (
         <div
           onClick={() => {/* TODO: Show all categories */}}
-          className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center cursor-pointer hover:shadow-md transition-shadow card-hover"
+          className="bg-card rounded-2xl p-5 shadow-lg border border-border text-center cursor-pointer hover:shadow-xl hover:scale-105 transition-all duration-200 card-hover"
           data-testid="category-more"
         >
-          <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-2">
-            <i className="fas fa-ellipsis-h text-gray-600 text-xl"></i>
+          <div className="w-14 h-14 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-3">
+            <i className="fas fa-ellipsis-h text-muted-foreground text-xl"></i>
           </div>
-          <p className="text-xs font-medium text-gray-700">More</p>
+          <p className="text-xs font-semibold text-card-foreground">More</p>
         </div>
       )}
     </div>

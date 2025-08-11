@@ -55,7 +55,7 @@ export default function CustomerDashboard() {
   }
 
   return (
-    <div className="min-h-screen pb-20">
+    <div className="min-h-screen pb-20 bg-background text-foreground">
       {/* Status Bar */}
       <div className="status-bar">
         <span>9:41 AM</span>
@@ -67,15 +67,15 @@ export default function CustomerDashboard() {
       </div>
 
       {/* Header */}
-      <div className="bg-gradient-purple text-white p-4">
-        <div className="flex items-center justify-between mb-4">
+      <div className="bg-gradient-purple text-white p-6">
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-lg font-semibold" data-testid="text-greeting">
+            <h2 className="text-xl font-bold mb-1" data-testid="text-greeting">
               Hello, {firebaseUser?.displayName || firebaseUser?.email || 'Customer'}!
             </h2>
-            <p className="text-purple-100 text-sm">What service do you need?</p>
+            <p className="text-purple-100 text-sm opacity-90">What service do you need today?</p>
           </div>
-          <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+          <div className="w-12 h-12 bg-white bg-opacity-15 rounded-2xl flex items-center justify-center backdrop-blur-sm">
             <i className="fas fa-bell text-lg"></i>
           </div>
         </div>
@@ -87,16 +87,16 @@ export default function CustomerDashboard() {
             placeholder="Search for services..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-white bg-opacity-90 text-gray-800 px-4 py-3 pl-10 rounded-xl placeholder-gray-500 border-0"
+            className="w-full bg-card/50 backdrop-blur-sm text-white px-4 py-4 pl-12 rounded-2xl placeholder-white/60 border border-white/10 focus:border-white/30"
             data-testid="input-search-services"
           />
-          <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+          <i className="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-white/60"></i>
         </div>
       </div>
 
       {/* Categories Grid */}
-      <div className="p-4">
-        <h3 className="font-semibold text-on-surface mb-4">Popular Services</h3>
+      <div className="p-6 bg-background">
+        <h3 className="font-bold text-foreground mb-6 text-lg">Popular Services</h3>
         <CategoryGrid 
           categories={categories || []} 
           onCategorySelect={handleCategorySelect}
@@ -104,27 +104,27 @@ export default function CustomerDashboard() {
 
         {/* Recent Activity */}
         {leads && leads.length > 0 && (
-          <div className="mt-6">
-            <h3 className="font-semibold text-on-surface mb-4">Your Recent Requests</h3>
-            <div className="space-y-3">
+          <div className="mt-8">
+            <h3 className="font-bold text-foreground mb-6 text-lg">Your Recent Requests</h3>
+            <div className="space-y-4">
               {leads.slice(0, 3).map((lead) => (
-                <div key={lead.id} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 lead-card">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium text-sm" data-testid={`text-lead-title-${lead.id}`}>
+                <div key={lead.id} className="bg-card rounded-2xl p-5 shadow-lg border border-border lead-card hover:shadow-xl transition-all duration-200">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="font-semibold text-card-foreground" data-testid={`text-lead-title-${lead.id}`}>
                       {lead.title}
                     </span>
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      lead.status === 'completed' ? 'bg-green-100 text-green-700' :
-                      lead.status === 'accepted' ? 'bg-blue-100 text-blue-700' :
-                      'bg-yellow-100 text-yellow-700'
+                    <span className={`text-xs px-3 py-1.5 rounded-full font-medium ${
+                      lead.status === 'completed' ? 'bg-success/20 text-success' :
+                      lead.status === 'accepted' ? 'bg-primary/20 text-primary' :
+                      'bg-warning/20 text-warning'
                     }`}>
                       {lead.status}
                     </span>
                   </div>
-                  <p className="text-gray-600 text-xs mb-2">{lead.description}</p>
-                  <div className="flex items-center justify-between text-xs text-gray-500">
+                  <p className="text-muted-foreground text-sm mb-3">{lead.description}</p>
+                  <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <span>{new Date(lead.createdAt!).toLocaleDateString()}</span>
-                    <span>
+                    <span className="font-medium text-primary">
                       ₹{lead.budgetMin}-{lead.budgetMax}
                     </span>
                   </div>
@@ -138,7 +138,7 @@ export default function CustomerDashboard() {
       {/* Floating Action Button */}
       <Button
         onClick={handlePostJob}
-        className="fab"
+        className="fab hover:scale-105 transition-transform duration-200"
         data-testid="button-post-job-fab"
       >
         <i className="fas fa-plus text-xl"></i>

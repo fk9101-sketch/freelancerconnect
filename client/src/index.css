@@ -5,44 +5,46 @@
 @tailwind utilities;
 
 :root {
-  --background: hsl(0 0% 100%);
-  --foreground: hsl(210 25% 7.8431%);
-  --card: hsl(180 6.6667% 97.0588%);
-  --card-foreground: hsl(210 25% 7.8431%);
-  --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(210 25% 7.8431%);
-  --primary: hsl(267 83% 53%);
+  /* Dark purple theme */
+  --background: hsl(252 47% 11%); /* #1E1B2E */
+  --foreground: hsl(0 0% 100%); /* White text */
+  --card: hsl(252 35% 15%); /* Slightly lighter purple for cards */
+  --card-foreground: hsl(0 0% 95%);
+  --popover: hsl(252 47% 11%);
+  --popover-foreground: hsl(0 0% 100%);
+  --primary: hsl(267 83% 53%); /* Purple accent */
   --primary-foreground: hsl(0 0% 100%);
-  --primary-light: hsl(267 66% 73%);
-  --primary-lighter: hsl(267 65% 80%);
-  --secondary: hsl(210 25% 7.8431%);
+  --primary-light: hsl(267 66% 73%); /* Light purple */
+  --primary-lighter: hsl(267 65% 80%); /* Lighter purple */
+  --primary-dark: hsl(267 83% 43%); /* Darker purple */
+  --secondary: hsl(252 25% 25%); /* Medium purple-gray */
   --secondary-foreground: hsl(0 0% 100%);
-  --muted: hsl(240 1.9608% 90%);
-  --muted-foreground: hsl(210 25% 7.8431%);
-  --accent: hsl(211.5789 51.3514% 92.7451%);
-  --accent-foreground: hsl(267 83% 53%);
-  --destructive: hsl(356.3033 90.5579% 54.3137%);
+  --muted: hsl(252 20% 20%); /* Muted purple */
+  --muted-foreground: hsl(0 0% 70%); /* Light gray text */
+  --accent: hsl(267 50% 25%); /* Purple accent background */
+  --accent-foreground: hsl(0 0% 100%);
+  --destructive: hsl(356 90% 54%);
   --destructive-foreground: hsl(0 0% 100%);
-  --border: hsl(201.4286 30.4348% 90.9804%);
-  --input: hsl(200 23.0769% 97.4510%);
+  --border: hsl(252 20% 25%); /* Purple border */
+  --input: hsl(252 25% 18%); /* Dark input background */
   --ring: hsl(267 83% 53%);
-  --success: hsl(142 76% 36%);
-  --warning: hsl(38 92% 50%);
-  --error: hsl(0 84% 60%);
-  --surface: hsl(0 0% 98%);
-  --on-surface: hsl(210 25% 7.8431%);
+  --success: hsl(142 76% 45%);
+  --warning: hsl(38 92% 60%);
+  --error: hsl(0 84% 65%);
+  --surface: hsl(252 47% 11%); /* Main background */
+  --on-surface: hsl(0 0% 100%); /* White text on surface */
   --chart-1: hsl(267 83% 53%);
-  --chart-2: hsl(159.7826 100% 36.0784%);
-  --chart-3: hsl(42.0290 92.8251% 56.2745%);
-  --chart-4: hsl(147.1429 78.5047% 41.9608%);
-  --chart-5: hsl(341.4894 75.2000% 50.9804%);
-  --sidebar: hsl(180 6.6667% 97.0588%);
-  --sidebar-foreground: hsl(210 25% 7.8431%);
+  --chart-2: hsl(159 100% 45%);
+  --chart-3: hsl(42 92% 60%);
+  --chart-4: hsl(147 78% 50%);
+  --chart-5: hsl(341 75% 60%);
+  --sidebar: hsl(252 35% 15%);
+  --sidebar-foreground: hsl(0 0% 95%);
   --sidebar-primary: hsl(267 83% 53%);
   --sidebar-primary-foreground: hsl(0 0% 100%);
-  --sidebar-accent: hsl(211.5789 51.3514% 92.7451%);
-  --sidebar-accent-foreground: hsl(267 83% 53%);
-  --sidebar-border: hsl(205.0000 25.0000% 90.5882%);
+  --sidebar-accent: hsl(267 50% 25%);
+  --sidebar-accent-foreground: hsl(0 0% 100%);
+  --sidebar-border: hsl(252 20% 25%);
   --sidebar-ring: hsl(267 83% 53%);
   --font-sans: 'Inter', sans-serif;
   --font-serif: Georgia, serif;
@@ -50,34 +52,7 @@
   --radius: 1.3rem;
 }
 
-.dark {
-  --background: hsl(0 0% 0%);
-  --foreground: hsl(200 6.6667% 91.1765%);
-  --card: hsl(228 9.8039% 10%);
-  --card-foreground: hsl(0 0% 85.0980%);
-  --popover: hsl(0 0% 0%);
-  --popover-foreground: hsl(200 6.6667% 91.1765%);
-  --primary: hsl(267 83% 53%);
-  --primary-foreground: hsl(0 0% 100%);
-  --primary-light: hsl(267 66% 73%);
-  --primary-lighter: hsl(267 65% 80%);
-  --secondary: hsl(195.0000 15.3846% 94.9020%);
-  --secondary-foreground: hsl(210 25% 7.8431%);
-  --muted: hsl(0 0% 9.4118%);
-  --muted-foreground: hsl(210 3.3898% 46.2745%);
-  --accent: hsl(205.7143 70% 7.8431%);
-  --accent-foreground: hsl(267 83% 53%);
-  --destructive: hsl(356.3033 90.5579% 54.3137%);
-  --destructive-foreground: hsl(0 0% 100%);
-  --border: hsl(210 5.2632% 14.9020%);
-  --input: hsl(207.6923 27.6596% 18.4314%);
-  --ring: hsl(267 83% 53%);
-  --success: hsl(142 76% 36%);
-  --warning: hsl(38 92% 50%);
-  --error: hsl(0 84% 60%);
-  --surface: hsl(228 9.8039% 10%);
-  --on-surface: hsl(200 6.6667% 91.1765%);
-}
+/* Remove dark mode override since we're always dark now */
 
 @layer base {
   * {
@@ -102,8 +77,8 @@
 .mobile-container {
   max-width: 28rem;
   margin: 0 auto;
-  background: white;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  background: hsl(var(--background));
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   min-height: 100vh;
   position: relative;
 }
@@ -192,9 +167,10 @@ textarea:focus {
   bottom: 0;
   left: 0;
   right: 0;
-  background: white;
+  background: hsl(var(--card));
   border-top: 1px solid hsl(var(--border));
   z-index: 100;
+  backdrop-filter: blur(10px);
 }
 
 .bottom-nav .nav-item {

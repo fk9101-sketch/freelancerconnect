@@ -57,7 +57,7 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Status Bar */}
       <div className="status-bar">
         <span>9:41 AM</span>
@@ -69,10 +69,10 @@ export default function Landing() {
       </div>
 
       {/* Hero Section */}
-      <div className="bg-gradient-purple text-white p-6 pb-12">
+      <div className="bg-gradient-purple text-white p-8 pb-16">
         <div className="text-center">
-          <div className="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <i className="fas fa-handshake text-3xl"></i>
+          <div className="w-24 h-24 bg-white bg-opacity-20 rounded-3xl flex items-center justify-center mx-auto mb-8 backdrop-blur-sm">
+            <i className="fas fa-handshake text-4xl"></i>
           </div>
           <h1 className="text-3xl font-bold mb-3" data-testid="app-title">Freelancer Connect</h1>
           <p className="text-purple-100 text-base">Connect with local service providers</p>
@@ -82,68 +82,68 @@ export default function Landing() {
 
       {/* Role Selection or Login */}
       <div className="p-6 -mt-8">
-        <div className="bg-white rounded-t-3xl shadow-lg p-6">
+        <div className="bg-card rounded-t-3xl shadow-2xl p-8 border border-border">
           {!selectedRole ? (
             /* Role Selection Screen */
             <div className="space-y-4">
-              <div className="text-center mb-6">
-                <h2 className="text-xl font-semibold text-gray-800 mb-2">Choose Your Role</h2>
-                <p className="text-gray-600 text-sm">Select how you want to use our platform</p>
+              <div className="text-center mb-8">
+                <h2 className="text-2xl font-bold text-card-foreground mb-3">Choose Your Role</h2>
+                <p className="text-muted-foreground">Select how you want to use our platform</p>
               </div>
 
               <Card 
-                className="bg-white rounded-2xl shadow-lg border border-gray-100 cursor-pointer hover:shadow-xl transition-all duration-200 hover:scale-105"
+                className="bg-card/50 backdrop-blur-sm rounded-2xl shadow-lg border border-border cursor-pointer hover:shadow-xl hover:scale-105 transition-all duration-200"
                 onClick={() => handleRoleSelect('customer')}
                 data-testid="card-customer-role"
               >
                 <CardContent className="p-6">
                   <div className="flex items-center space-x-4">
-                    <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center">
-                      <i className="fas fa-search text-blue-600 text-xl"></i>
+                    <div className="w-16 h-16 bg-blue-500/20 rounded-2xl flex items-center justify-center">
+                      <i className="fas fa-search text-blue-400 text-2xl"></i>
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-semibold text-on-surface text-lg">For Customers</h3>
-                      <p className="text-gray-600 text-sm">Find local service providers</p>
+                      <h3 className="font-bold text-card-foreground text-lg">For Customers</h3>
+                      <p className="text-muted-foreground text-sm">Find local service providers</p>
                     </div>
-                    <i className="fas fa-chevron-right text-gray-400"></i>
+                    <i className="fas fa-chevron-right text-primary"></i>
                   </div>
                 </CardContent>
               </Card>
 
               <Card 
-                className="bg-white rounded-2xl shadow-lg border border-gray-100 cursor-pointer hover:shadow-xl transition-all duration-200 hover:scale-105"
+                className="bg-card/50 backdrop-blur-sm rounded-2xl shadow-lg border border-border cursor-pointer hover:shadow-xl hover:scale-105 transition-all duration-200"
                 onClick={() => handleRoleSelect('freelancer')}
                 data-testid="card-freelancer-role"
               >
                 <CardContent className="p-6">
                   <div className="flex items-center space-x-4">
-                    <div className="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center">
-                      <i className="fas fa-hammer text-green-600 text-xl"></i>
+                    <div className="w-16 h-16 bg-green-500/20 rounded-2xl flex items-center justify-center">
+                      <i className="fas fa-hammer text-green-400 text-2xl"></i>
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-semibold text-on-surface text-lg">For Freelancers</h3>
-                      <p className="text-gray-600 text-sm">Offer your services locally</p>
+                      <h3 className="font-bold text-card-foreground text-lg">For Freelancers</h3>
+                      <p className="text-muted-foreground text-sm">Offer your services locally</p>
                     </div>
-                    <i className="fas fa-chevron-right text-gray-400"></i>
+                    <i className="fas fa-chevron-right text-primary"></i>
                   </div>
                 </CardContent>
               </Card>
 
               <Card 
-                className="bg-white rounded-2xl shadow-lg border border-gray-100 cursor-pointer hover:shadow-xl transition-all duration-200 hover:scale-105"
+                className="bg-card/50 backdrop-blur-sm rounded-2xl shadow-lg border border-border cursor-pointer hover:shadow-xl hover:scale-105 transition-all duration-200"
                 onClick={() => handleRoleSelect('admin')}
                 data-testid="card-admin-role"
               >
                 <CardContent className="p-6">
                   <div className="flex items-center space-x-4">
-                    <div className="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center">
-                      <i className="fas fa-cog text-primary text-xl"></i>
+                    <div className="w-16 h-16 bg-purple-500/20 rounded-2xl flex items-center justify-center">
+                      <i className="fas fa-cog text-purple-400 text-2xl"></i>
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-semibold text-on-surface text-lg">Admin Portal</h3>
-                      <p className="text-gray-600 text-sm">Manage platform operations</p>
+                      <h3 className="font-bold text-card-foreground text-lg">Admin Portal</h3>
+                      <p className="text-muted-foreground text-sm">Manage platform operations</p>
                     </div>
-                    <i className="fas fa-chevron-right text-gray-400"></i>
+                    <i className="fas fa-chevron-right text-primary"></i>
                   </div>
                 </CardContent>
               </Card>
