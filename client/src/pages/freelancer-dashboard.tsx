@@ -351,7 +351,7 @@ export default function FreelancerDashboard() {
       </div>
 
       {/* Bottom Navigation */}
-      <Navigation currentPage="dashboard" userRole="freelancer" />
+      <Navigation />
     </div>
   );
 }

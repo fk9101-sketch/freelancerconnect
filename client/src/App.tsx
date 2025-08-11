@@ -14,6 +14,7 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import JobPosting from "@/pages/job-posting";
 import SubscriptionPlans from "@/pages/subscription-plans";
 import Profile from "@/pages/profile";
+import FreelancerProfile from "@/pages/freelancer-profile";
 import PhoneAuth from "@/pages/phone-auth";
 import CustomerSearch from "@/pages/customer-search";
 import CustomerRequests from "@/pages/customer-requests";
@@ -52,7 +53,7 @@ function Router() {
             <Route path="/plans" component={SubscriptionPlans} />
             <Route path="/profile" component={Profile} />
             <Route path="/customer/profile" component={Profile} />
-            <Route path="/freelancer/profile" component={Profile} />
+            <Route path="/freelancer/profile" component={FreelancerProfile} />
             <Route path="/admin/profile" component={Profile} />
           </>
         )}

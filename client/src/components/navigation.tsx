@@ -1,15 +1,24 @@
 import { useLocation } from "wouter";
 
 interface NavigationProps {
-  currentPage: string;
-  userRole: 'customer' | 'freelancer' | 'admin';
+  currentPage?: string;
+  userRole?: 'customer' | 'freelancer' | 'admin';
 }
 
 export default function Navigation({ currentPage, userRole }: NavigationProps) {
   const [, setLocation] = useLocation();
 
+  // Auto-detect user role from localStorage if not provided
+  const getUserRole = (): 'customer' | 'freelancer' | 'admin' => {
+    if (userRole) return userRole;
+    const storedRole = localStorage.getItem('selectedRole');
+    return (storedRole as 'customer' | 'freelancer' | 'admin') || 'customer';
+  };
+
+  const actualUserRole = getUserRole();
+
   const getNavItems = () => {
-    switch (userRole) {
+    switch (actualUserRole) {
       case 'customer':
         return [
           { id: 'home', icon: 'fas fa-home', label: 'Home', path: '/customer' },

@@ -170,7 +170,7 @@ export default function Profile() {
   };
 
   const handleProfilePhotoUpload = (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
-    if (result.successful[0]?.uploadURL) {
+    if (result.successful && result.successful[0]?.uploadURL) {
       const photoUrl = result.successful[0].uploadURL;
       setProfilePhoto(photoUrl);
       form.setValue('profilePhotoUrl', photoUrl);
@@ -182,7 +182,7 @@ export default function Profile() {
   };
 
   const handlePortfolioUpload = (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
-    if (result.successful.length > 0) {
+    if (result.successful && result.successful.length > 0) {
       const newImages = result.successful.map(file => file.uploadURL || '').filter(Boolean);
       const updatedImages = [...portfolioImages, ...newImages];
       setPortfolioImages(updatedImages);
@@ -195,7 +195,7 @@ export default function Profile() {
   };
 
   const handleIdProofUpload = (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
-    if (result.successful[0]?.uploadURL) {
+    if (result.successful && result.successful[0]?.uploadURL) {
       const docUrl = result.successful[0].uploadURL;
       setIdProofUrl(docUrl);
       form.setValue('idProofUrl', docUrl);
@@ -457,7 +457,7 @@ export default function Profile() {
       </div>
 
       {/* Bottom Navigation */}
-      <Navigation currentPage="profile" userRole={getUserRole()} />
+      <Navigation />
     </div>
   );
 }
