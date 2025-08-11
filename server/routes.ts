@@ -220,7 +220,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const lead = await storage.createLead(leadData);
       
       // Notify relevant freelancers
-      const freelancers = await storage.getFreelancersByCategory(leadData.categoryId, leadData.pincode);
+      const freelancers = await storage.getFreelancersByCategory(leadData.categoryId, leadData.pincode || '');
       for (const freelancer of freelancers) {
         notifyUser(freelancer.userId, {
           type: 'new_lead',

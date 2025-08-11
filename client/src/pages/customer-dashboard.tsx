@@ -78,7 +78,7 @@ export default function CustomerDashboard() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-lg font-semibold" data-testid="text-greeting">
-              Hello, {user?.firstName || 'Customer'}!
+              Hello, {(user && 'firstName' in user && user.firstName) || 'Customer'}!
             </h2>
             <p className="text-purple-100 text-sm">What service do you need?</p>
           </div>

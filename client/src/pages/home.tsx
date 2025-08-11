@@ -76,20 +76,21 @@ export default function Home() {
   }
 
   // If user already has a role, redirect to appropriate dashboard
-  if (user?.role && user.role !== 'customer') {
-    switch (user.role) {
-      case 'freelancer':
-        setLocation('/freelancer');
-        break;
-      case 'admin':
-        setLocation('/admin');
-        break;
-      default:
-        setLocation('/customer');
-        break;
+  useEffect(() => {
+    if (user && 'role' in user && user.role && user.role !== null) {
+      switch (user.role) {
+        case 'freelancer':
+          setLocation('/freelancer');
+          break;
+        case 'admin':
+          setLocation('/admin');
+          break;
+        case 'customer':
+          setLocation('/customer');
+          break;
+      }
     }
-    return null;
-  }
+  }, [user, setLocation]);
 
   return (
     <div className="min-h-screen">
@@ -111,7 +112,7 @@ export default function Home() {
           </div>
           <h1 className="text-2xl font-bold mb-2">Welcome back!</h1>
           <p className="text-purple-100 text-sm">
-            Hello, {user?.firstName || user?.email || 'User'}
+            Hello, {(user && 'firstName' in user && user.firstName) || (user && 'email' in user && user.email) || 'User'}
           </p>
         </div>
       </div>

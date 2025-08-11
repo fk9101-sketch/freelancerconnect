@@ -16,7 +16,7 @@ export function useWebSocket({ onMessage, onConnect, onDisconnect, onError }: We
   const reconnectAttemptsRef = useRef(0);
 
   const connect = () => {
-    if (!isAuthenticated || !user?.id) return;
+    if (!isAuthenticated || !user || !('id' in user) || !user.id) return;
 
     // Don't create multiple connections
     if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
@@ -25,7 +25,7 @@ export function useWebSocket({ onMessage, onConnect, onDisconnect, onError }: We
 
     try {
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const wsUrl = `${protocol}//${window.location.host}/ws?userId=${user.id}`;
+      const wsUrl = `${protocol}//${window.location.host}/ws?userId=${(user && 'id' in user) ? user.id : ''}`;
       
       socketRef.current = new WebSocket(wsUrl);
 
@@ -91,14 +91,14 @@ export function useWebSocket({ onMessage, onConnect, onDisconnect, onError }: We
 
   // Connect when authenticated
   useEffect(() => {
-    if (isAuthenticated && user?.id) {
+    if (isAuthenticated && user && 'id' in user && user.id) {
       connect();
     }
 
     return () => {
       disconnect();
     };
-  }, [isAuthenticated, user?.id]);
+  }, [isAuthenticated, user]);
 
   // Cleanup on unmount
   useEffect(() => {

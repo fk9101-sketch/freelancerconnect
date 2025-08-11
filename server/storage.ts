@@ -273,7 +273,6 @@ export class DatabaseStorage implements IStorage {
       acceptedByFreelancer: result.freelancer_profiles ? {
         ...result.freelancer_profiles,
         user: result.users!,
-        category: result.categories!,
         subscriptions: []
       } : undefined
     };
