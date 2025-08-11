@@ -16,8 +16,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import type { Category } from "@shared/schema";
 
 const jobPostingSchema = insertLeadSchema.extend({
-  budgetMin: z.number().min(1, "Minimum budget is required"),
-  budgetMax: z.number().min(1, "Maximum budget is required"),
+  budgetMin: z.coerce.number().min(1, "Minimum budget is required"),
+  budgetMax: z.coerce.number().min(1, "Maximum budget is required"),
 }).refine((data) => data.budgetMax >= data.budgetMin, {
   message: "Maximum budget must be greater than or equal to minimum budget",
   path: ["budgetMax"],
@@ -89,6 +89,65 @@ export default function JobPosting() {
   });
 
   const onSubmit = (data: JobPostingForm) => {
+    console.log('Form submission data:', data);
+    console.log('Form errors:', form.formState.errors);
+    
+    // Validate required fields manually
+    if (!data.categoryId) {
+      toast({
+        title: "Validation Error",
+        description: "Please select a service category",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!data.title || data.title.trim().length === 0) {
+      toast({
+        title: "Validation Error", 
+        description: "Please enter a job title",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!data.description || data.description.trim().length === 0) {
+      toast({
+        title: "Validation Error",
+        description: "Please enter a description",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!data.budgetMin || data.budgetMin <= 0) {
+      toast({
+        title: "Validation Error",
+        description: "Please enter a valid minimum budget",
+        variant: "destructive", 
+      });
+      return;
+    }
+    
+    if (!data.budgetMax || data.budgetMax <= 0) {
+      toast({
+        title: "Validation Error",
+        description: "Please enter a valid maximum budget",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!data.location || data.location.trim().length === 0) {
+      toast({
+        title: "Validation Error",
+        description: "Please enter a location",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    console.log('All validations passed, submitting:', data);
     createLeadMutation.mutate(data);
   };
 
@@ -402,9 +461,27 @@ export default function JobPosting() {
         <button
           type="button"
           disabled={createLeadMutation.isPending}
-          onClick={(e) => {
+          onClick={async (e) => {
             e.preventDefault();
-            form.handleSubmit(onSubmit)();
+            console.log('Submit button clicked');
+            console.log('Current form values:', form.getValues());
+            console.log('Form state:', form.formState);
+            
+            // Trigger form validation and submission
+            const isValid = await form.trigger();
+            console.log('Form validation result:', isValid);
+            
+            if (isValid) {
+              const formData = form.getValues();
+              onSubmit(formData);
+            } else {
+              console.log('Form validation failed:', form.formState.errors);
+              toast({
+                title: "Validation Error",
+                description: "Please fill in all required fields correctly",
+                variant: "destructive",
+              });
+            }
           }}
           className="w-full text-white py-4 px-6 rounded-xl font-semibold text-lg hover:opacity-90 transition-opacity shadow-lg disabled:opacity-50"
           style={{ 
