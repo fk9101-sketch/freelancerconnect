@@ -161,7 +161,7 @@ export default function JobPosting() {
       </div>
 
       {/* Form Content */}
-      <div className="p-4 pb-24">
+      <div className="p-4 pb-32">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Category Selection */}
@@ -390,26 +390,28 @@ export default function JobPosting() {
               </div>
             </div>
 
-            {/* Submit Button */}
-            <div className="mt-8 mb-4">
-              <Button
-                type="submit"
-                disabled={createLeadMutation.isPending}
-                className="w-full bg-gradient-purple text-white py-4 rounded-xl font-medium text-lg hover:opacity-90 transition-opacity shadow-lg"
-                data-testid="button-post-job"
-              >
-                {createLeadMutation.isPending ? (
-                  <div className="flex items-center justify-center">
-                    <div className="spinner mr-2"></div>
-                    Posting...
-                  </div>
-                ) : (
-                  "Post Your Requirement"
-                )}
-              </Button>
-            </div>
           </form>
         </Form>
+      </div>
+
+      {/* Fixed Submit Button at Bottom */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 z-50">
+        <Button
+          type="submit"
+          disabled={createLeadMutation.isPending}
+          onClick={() => form.handleSubmit(onSubmit)()}
+          className="w-full bg-gradient-purple text-white py-4 rounded-xl font-medium text-lg hover:opacity-90 transition-opacity shadow-lg"
+          data-testid="button-post-job"
+        >
+          {createLeadMutation.isPending ? (
+            <div className="flex items-center justify-center">
+              <div className="spinner mr-2"></div>
+              Posting...
+            </div>
+          ) : (
+            "Post Your Requirement"
+          )}
+        </Button>
       </div>
     </div>
   );
