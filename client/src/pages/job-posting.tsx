@@ -396,7 +396,8 @@ export default function JobPosting() {
 
       {/* Fixed Submit Button at Bottom */}
       <div 
-        className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 shadow-lg z-50"
+        className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 shadow-lg"
+        style={{ zIndex: 9999, position: 'fixed', bottom: 0 }}
       >
         <button
           type="button"
@@ -405,7 +406,12 @@ export default function JobPosting() {
             e.preventDefault();
             form.handleSubmit(onSubmit)();
           }}
-          className="w-full bg-gradient-purple text-white py-4 px-6 rounded-xl font-semibold text-lg hover:opacity-90 transition-opacity shadow-lg disabled:opacity-50"
+          className="w-full text-white py-4 px-6 rounded-xl font-semibold text-lg hover:opacity-90 transition-opacity shadow-lg disabled:opacity-50"
+          style={{ 
+            background: 'linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%)',
+            border: 'none',
+            color: 'white'
+          }}
           data-testid="button-post-job"
         >
           {createLeadMutation.isPending ? (
