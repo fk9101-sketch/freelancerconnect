@@ -15,6 +15,8 @@ import JobPosting from "@/pages/job-posting";
 import SubscriptionPlans from "@/pages/subscription-plans";
 import Profile from "@/pages/profile";
 import PhoneAuth from "@/pages/phone-auth";
+import CustomerSearch from "@/pages/customer-search";
+import CustomerRequests from "@/pages/customer-requests";
 
 function Router() {
   // Use Firebase auth for authentication state
@@ -42,6 +44,8 @@ function Router() {
           <>
             <Route path="/" component={Home} />
             <Route path="/customer" component={CustomerDashboard} />
+            <Route path="/customer/search" component={CustomerSearch} />
+            <Route path="/customer/requests" component={CustomerRequests} />
             <Route path="/freelancer" component={FreelancerDashboard} />
             <Route path="/admin" component={AdminDashboard} />
             <Route path="/post-job" component={JobPosting} />
