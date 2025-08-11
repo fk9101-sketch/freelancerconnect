@@ -80,18 +80,6 @@ export default function JobPosting() {
       setLocation('/customer');
     },
     onError: (error: any) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-      
       toast({
         title: "Error",
         description: error.message || "Failed to post job",
@@ -173,7 +161,7 @@ export default function JobPosting() {
       </div>
 
       {/* Form Content */}
-      <div className="p-4 pb-20">
+      <div className="p-4 pb-24">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Category Selection */}
@@ -403,21 +391,23 @@ export default function JobPosting() {
             </div>
 
             {/* Submit Button */}
-            <Button
-              type="submit"
-              disabled={createLeadMutation.isPending}
-              className="w-full bg-gradient-purple text-white py-3 rounded-xl font-medium text-lg hover:opacity-90 transition-opacity"
-              data-testid="button-post-job"
-            >
-              {createLeadMutation.isPending ? (
-                <div className="flex items-center justify-center">
-                  <div className="spinner mr-2"></div>
-                  Posting...
-                </div>
-              ) : (
-                "Post Job Request"
-              )}
-            </Button>
+            <div className="mt-8 mb-4">
+              <Button
+                type="submit"
+                disabled={createLeadMutation.isPending}
+                className="w-full bg-gradient-purple text-white py-4 rounded-xl font-medium text-lg hover:opacity-90 transition-opacity shadow-lg"
+                data-testid="button-post-job"
+              >
+                {createLeadMutation.isPending ? (
+                  <div className="flex items-center justify-center">
+                    <div className="spinner mr-2"></div>
+                    Posting...
+                  </div>
+                ) : (
+                  "Post Your Requirement"
+                )}
+              </Button>
+            </div>
           </form>
         </Form>
       </div>
