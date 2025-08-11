@@ -1,0 +1,165 @@
+Title: Freelancer Connect — Native Android App for Local Service Hiring
+Description:
+Build a native Android application called Freelancer Connect, designed to connect local customers with independent service providers (freelancers) such as electricians, carpenters, plumbers, painters, mechanics, and more. The app must have a modern, purple-themed Android UI, real-time lead notifications, offline caching, role-based dashboards, subscription payments, and a powerful admin backend.
+
+Tech Stack & Architecture:
+
+Frontend (Android): Kotlin (Jetpack Compose or XML UI)
+
+Backend: Node.js with Express.js
+
+Database: MongoDB with Mongoose
+
+Local Data Storage: Room Database + SharedPreferences
+
+Auth: JWT + Gmail OAuth 2.0 + Mobile OTP (Firebase Auth)
+
+Push Notifications: Firebase Cloud Messaging (FCM) with real-time updates via Socket.IO
+
+Payments: Razorpay Android SDK (subscriptions, webhooks in backend)
+
+Offline Support: Room caching for profiles & leads
+
+Security: Password hashing, sensitive data encryption, API rate limiting
+
+Export: PDF/CSV lead history for freelancers (generated in backend, downloadable in app)
+
+Admin Panel: Web-based dashboard with role-based access control (React.js or similar)
+
+User Roles & Features:
+1. Admin (Web Dashboard):
+
+Manage freelancer & customer accounts
+
+Approve/reject freelancer verification docs
+
+Assign/remove badges (Verified/Trusted)
+
+Set & manage subscription plans (Lead, Position, Badge)
+
+Assign/revoke Position Plan slots per category & area
+
+Manual lead assignment & reassignment
+
+Push freelancer contact to customer
+
+Suspend/delete accounts
+
+Broadcast announcements & push notifications
+
+Handle disputes & refunds
+
+View analytics (leads per area, acceptance rate, churn rate)
+
+Maintain audit logs
+
+2. Freelancer (Android App):
+
+Register, select categories, define working areas (pincode/GPS), upload profile photo/docs
+
+View leads in registered area/category
+
+Paid freelancers: Accept leads instantly
+
+Free freelancers: Only view leads or click “Express Interest”
+
+Paid freelancers have thumbs-up icon on listing
+
+Position Plan freelancers appear at top search results
+
+Export lead history (PDF/CSV)
+
+Receive push notifications for new leads
+
+3. Customer (Android App):
+
+Login via Gmail OAuth or Mobile OTP
+
+Search freelancers by category + area (pincode or GPS radius)
+
+View freelancer profiles (rating, verification, past jobs)
+
+Post job requirements (text, photos, budget, preferred time, location)
+
+Receive freelancer details when paid freelancer accepts
+
+View only freelancers from their own area
+
+Categories:
+Electrician, Carpenter, Plumber, Painter, Mechanic, AC/Appliance Repair, Welder, Mason, Gardener, Cleaner, Interior Designer, Driver, Tutor, Photographer, Makeup Artist, IT Technician, Event Planner, Pest Control, Movers/Packers, Others (admin editable)
+
+Lead Management Workflow:
+
+Customer posts requirement → stored in backend DB (leads collection)
+
+Backend matches freelancers by category + area
+
+Matched freelancers get FCM push notifications instantly
+
+Paid freelancers: “Accept” button enabled; Free: disabled
+
+First paid freelancer to accept → customer notified instantly with freelancer’s details
+
+If no paid freelancer → admin alert to assign manually
+
+Monetization Plans:
+
+Lead Plan: ₹299/mo, ₹599/qtr, ₹999/year (+ GST) → Accept leads
+
+Position Plan (per category & area):
+
+1st Position: ₹1999 + GST
+
+2nd Position: ₹999 + GST
+
+3rd Position: ₹699 + GST
+
+Badge Plan: Verified ₹299 + GST, Trusted ₹999 + GST
+
+UI/UX Requirements (Android App):
+
+Material Design 3, purple primary color, light purple accents, gradient buttons, rounded cards
+
+BottomNavigationView: Home, Search, Post Lead (FAB), Leads, Profile
+
+Category icons with grid layout
+
+Card-based freelancer listings with thumbs-up icon for paid
+
+Top slots marked #1, #2, #3
+
+Job post form with image picker & location picker (Google Maps API)
+
+GPS & pincode search filter
+
+Real-time notification sound (like Swiggy/Zomato)
+
+Database Models:
+
+users, freelancer_profiles, leads, subscriptions, positions, badges, audit_logs
+
+Project Structure:
+
+rust
+Copy
+Edit
+/android-app   -> Kotlin Android app (Jetpack Compose/XML)
+/server        -> Node.js backend (Express + Mongoose)
+/config        -> Environment & DB config
+/models        -> MongoDB schemas
+/routes        -> API endpoints
+/controllers   -> Business logic
+/utils         -> Helpers
+/public        -> Static files for admin panel
+.env           -> Environment variables
+Deliverables:
+
+Native Android app (Kotlin) with responsive design
+
+Admin web dashboard with all control features
+
+Subscription & payment flow
+
+Real-time FCM notifications
+
+API & database documentation
