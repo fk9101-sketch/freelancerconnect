@@ -128,18 +128,20 @@ export default function PhoneAuth() {
       </div>
 
       {/* Header */}
-      <div className="bg-gradient-purple text-white p-6">
-        <div className="flex items-center space-x-4">
+      <div className="bg-gradient-purple text-white p-4">
+        <div className="flex items-center space-x-3">
           <Button
             variant="ghost"
             size="sm"
             onClick={goBack}
-            className="text-white hover:bg-white/20 p-2"
+            className="text-white hover:bg-white/20 p-2 rounded-full"
             data-testid="button-back"
           >
-            <i className="fas fa-arrow-left"></i>
+            <i className="fas fa-arrow-left text-lg"></i>
           </Button>
-          <h1 className="text-xl font-semibold">Phone Authentication</h1>
+          <h1 className="text-lg font-semibold">
+            {step === "phone" ? "Enter Phone Number" : "Verify Code"}
+          </h1>
         </div>
       </div>
 

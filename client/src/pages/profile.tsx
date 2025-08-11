@@ -63,6 +63,22 @@ export default function Profile() {
     );
   }
 
+  const goBack = () => {
+    const role = getUserRole();
+    switch (role) {
+      case 'freelancer':
+        setLocation('/freelancer');
+        break;
+      case 'admin':
+        setLocation('/admin');
+        break;
+      case 'customer':
+      default:
+        setLocation('/customer');
+        break;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       {/* Status Bar */}
