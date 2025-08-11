@@ -394,41 +394,31 @@ export default function JobPosting() {
         </Form>
       </div>
 
-      {/* Fixed Submit Button at Bottom - ALWAYS VISIBLE */}
+      {/* Fixed Submit Button at Bottom */}
       <div 
-        className="fixed bottom-0 left-0 right-0 p-4 bg-red-500 border-t-4 border-red-600 shadow-2xl"
-        style={{ 
-          zIndex: 99999,
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          backgroundColor: '#dc2626',
-          padding: '16px'
-        }}
+        className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 shadow-lg z-50"
       >
         <button
           type="button"
           disabled={createLeadMutation.isPending}
           onClick={(e) => {
             e.preventDefault();
-            console.log('Button clicked!');
             form.handleSubmit(onSubmit)();
           }}
-          className="w-full bg-purple-600 text-white py-4 px-6 rounded-xl font-bold text-xl border-4 border-purple-800"
-          style={{
-            width: '100%',
-            backgroundColor: '#7c3aed',
-            color: 'white',
-            padding: '16px',
-            borderRadius: '12px',
-            fontSize: '20px',
-            fontWeight: 'bold',
-            border: '4px solid #5b21b6'
-          }}
+          className="w-full bg-gradient-purple text-white py-4 px-6 rounded-xl font-semibold text-lg hover:opacity-90 transition-opacity shadow-lg disabled:opacity-50"
           data-testid="button-post-job"
         >
-          {createLeadMutation.isPending ? 'POSTING...' : 'POST YOUR REQUIREMENT'}
+          {createLeadMutation.isPending ? (
+            <div className="flex items-center justify-center">
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+              Posting...
+            </div>
+          ) : (
+            <div className="flex items-center justify-center">
+              <i className="fas fa-paper-plane mr-2"></i>
+              Post Your Requirement
+            </div>
+          )}
         </button>
       </div>
     </div>
