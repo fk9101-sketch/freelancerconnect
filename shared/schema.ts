@@ -61,13 +61,30 @@ export const freelancerProfiles = pgTable("freelancer_profiles", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id),
   categoryId: varchar("category_id").notNull().references(() => categories.id),
+  
+  // Enhanced profile fields
+  professionalTitle: varchar("professional_title"),
+  profilePhotoUrl: varchar("profile_photo_url"),
   workingAreas: text("working_areas").array(), // pincodes or area names
   bio: text("bio"),
-  experience: varchar("experience"),
+  experience: varchar("experience"), // years
+  experienceDescription: text("experience_description"),
+  skills: text("skills").array(),
+  portfolioImages: text("portfolio_images").array(),
+  certifications: text("certifications").array(),
+  idProofUrl: varchar("id_proof_url"),
+  hourlyRate: varchar("hourly_rate"),
+  
+  // Availability schedule (JSON format)
+  availabilitySchedule: jsonb("availability_schedule"),
+  isAvailable: boolean("is_available").default(true),
+  
+  // System fields
   rating: decimal("rating", { precision: 3, scale: 2 }).default('0'),
   totalJobs: integer("total_jobs").default(0),
   verificationStatus: verificationStatusEnum("verification_status").default('pending'),
   verificationDocs: text("verification_docs").array(),
+  profileCompletionScore: integer("profile_completion_score").default(0),
   isOnline: boolean("is_online").default(false),
   lastSeen: timestamp("last_seen"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -200,6 +217,17 @@ export const insertFreelancerProfileSchema = createInsertSchema(freelancerProfil
   id: true,
   createdAt: true,
   updatedAt: true,
+  rating: true,
+  totalJobs: true,
+  profileCompletionScore: true,
+  isOnline: true,
+  lastSeen: true,
+}).extend({
+  skills: z.array(z.string()).optional(),
+  portfolioImages: z.array(z.string()).optional(),
+  certifications: z.array(z.string()).optional(),
+  workingAreas: z.array(z.string()).optional(),
+  verificationDocs: z.array(z.string()).optional(),
 });
 
 export const insertLeadSchema = createInsertSchema(leads).omit({
@@ -246,3 +274,6 @@ export type FreelancerWithRelations = FreelancerProfile & {
   category: Category;
   subscriptions: Subscription[];
 };
+
+// Form type for enhanced freelancer profile
+export type InsertFreelancerProfileForm = z.infer<typeof insertFreelancerProfileSchema>;

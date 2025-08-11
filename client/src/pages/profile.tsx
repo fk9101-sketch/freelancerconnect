@@ -1,19 +1,34 @@
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { signOutUser } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import Navigation from "@/components/navigation";
+import { CircularProgress } from "@/components/CircularProgress";
+import { ObjectUploader } from "@/components/ObjectUploader";
+import { insertFreelancerProfileSchema, type InsertFreelancerProfileForm } from "@shared/schema";
+import type { UploadResult } from "@uppy/core";
+import { Clock, MapPin, DollarSign, Star, Upload, Camera, FileText, Award, Shield } from "lucide-react";
 
 export default function Profile() {
   const { user: firebaseUser, isAuthenticated, isLoading } = useFirebaseAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
+  const [profilePhoto, setProfilePhoto] = useState<string>("");
+  const [portfolioImages, setPortfolioImages] = useState<string[]>([]);
+  const [idProofUrl, setIdProofUrl] = useState<string>("");
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -59,10 +74,160 @@ export default function Profile() {
     return firebaseUser?.email || '';
   };
 
+  // Mock profile data for demonstration
+  const mockProfile: InsertFreelancerProfileForm = {
+    userId: firebaseUser?.uid || '',
+    categoryId: '1',
+    professionalTitle: 'Senior Electrician',
+    profilePhotoUrl: profilePhoto,
+    workingAreas: ['Mumbai', 'Navi Mumbai', 'Thane'],
+    bio: 'Experienced electrician with 8+ years of expertise in residential and commercial electrical work.',
+    experience: '8',
+    experienceDescription: 'Started as an apprentice and worked my way up to handling complex electrical installations, maintenance, and repairs for both residential and commercial properties.',
+    skills: ['Electrical Installation', 'Circuit Repair', 'LED Installation', 'Panel Upgrades', 'Troubleshooting'],
+    portfolioImages: portfolioImages,
+    certifications: ['Licensed Electrician', 'Safety Training Certificate'],
+    idProofUrl: idProofUrl,
+    hourlyRate: '₹500-800',
+    verificationStatus: 'approved',
+    isAvailable: true,
+    availabilitySchedule: {
+      monday: { available: true, hours: '9:00 AM - 6:00 PM' },
+      tuesday: { available: true, hours: '9:00 AM - 6:00 PM' },
+      wednesday: { available: true, hours: '9:00 AM - 6:00 PM' },
+      thursday: { available: true, hours: '9:00 AM - 6:00 PM' },
+      friday: { available: true, hours: '9:00 AM - 6:00 PM' },
+      saturday: { available: true, hours: '10:00 AM - 4:00 PM' },
+      sunday: { available: false, hours: 'Closed' }
+    },
+    verificationDocs: []
+  };
+
+  // Form setup
+  const form = useForm<InsertFreelancerProfileForm>({
+    resolver: zodResolver(insertFreelancerProfileSchema),
+    defaultValues: mockProfile,
+  });
+
+  // Calculate profile completion score
+  const calculateProfileCompletion = (profile: InsertFreelancerProfileForm): number => {
+    const requiredFields = [
+      'professionalTitle',
+      'bio', 
+      'experience',
+      'workingAreas',
+      'hourlyRate'
+    ];
+    
+    const optionalFields = [
+      'profilePhotoUrl',
+      'experienceDescription', 
+      'skills',
+      'portfolioImages',
+      'certifications',
+      'idProofUrl',
+      'availabilitySchedule'
+    ];
+
+    let score = 0;
+    const totalFields = requiredFields.length + optionalFields.length;
+
+    // Required fields (70% weight)
+    requiredFields.forEach(field => {
+      const value = profile[field as keyof InsertFreelancerProfileForm];
+      if (value && (Array.isArray(value) ? value.length > 0 : value.toString().trim())) {
+        score += 70 / requiredFields.length;
+      }
+    });
+
+    // Optional fields (30% weight) 
+    optionalFields.forEach(field => {
+      const value = profile[field as keyof InsertFreelancerProfileForm];
+      if (value && (Array.isArray(value) ? value.length > 0 : value.toString().trim())) {
+        score += 30 / optionalFields.length;
+      }
+    });
+
+    return Math.round(score);
+  };
+
+  const currentProfile = form.watch();
+  const completionScore = calculateProfileCompletion(currentProfile);
+
+  // Field completion status
+  const getFieldStatus = (fieldName: keyof InsertFreelancerProfileForm) => {
+    const value = currentProfile[fieldName];
+    return value && (Array.isArray(value) ? value.length > 0 : value.toString().trim());
+  };
+
+  // Upload handlers
+  const handleGetUploadParameters = async () => {
+    // Mock upload URL for demo - in real app this would call the backend
+    return {
+      method: 'PUT' as const,
+      url: 'https://example.com/upload',
+    };
+  };
+
+  const handleProfilePhotoUpload = (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
+    if (result.successful[0]?.uploadURL) {
+      const photoUrl = result.successful[0].uploadURL;
+      setProfilePhoto(photoUrl);
+      form.setValue('profilePhotoUrl', photoUrl);
+      toast({
+        title: "Profile photo uploaded",
+        description: "Your profile photo has been updated successfully.",
+      });
+    }
+  };
+
+  const handlePortfolioUpload = (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
+    if (result.successful.length > 0) {
+      const newImages = result.successful.map(file => file.uploadURL || '').filter(Boolean);
+      const updatedImages = [...portfolioImages, ...newImages];
+      setPortfolioImages(updatedImages);
+      form.setValue('portfolioImages', updatedImages);
+      toast({
+        title: "Portfolio images uploaded",
+        description: `${newImages.length} image(s) added to your portfolio.`,
+      });
+    }
+  };
+
+  const handleIdProofUpload = (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
+    if (result.successful[0]?.uploadURL) {
+      const docUrl = result.successful[0].uploadURL;
+      setIdProofUrl(docUrl);
+      form.setValue('idProofUrl', docUrl);
+      toast({
+        title: "ID proof uploaded",
+        description: "Your ID verification document has been uploaded successfully.",
+      });
+    }
+  };
+
+  const onSubmit = async (data: InsertFreelancerProfileForm) => {
+    try {
+      // In real app, this would save to the backend
+      console.log('Profile data:', data);
+      toast({
+        title: "Profile updated",
+        description: "Your freelancer profile has been updated successfully.",
+      });
+      setIsEditing(false);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update profile. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="spinner"></div>
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
