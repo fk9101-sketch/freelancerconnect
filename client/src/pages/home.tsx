@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
+import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
+import { signOutUser } from "@/lib/firebase";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -9,22 +11,27 @@ import { Card, CardContent } from "@/components/ui/card";
 
 export default function Home() {
   const { user, isAuthenticated, isLoading } = useAuth();
+  const { user: firebaseUser, isAuthenticated: firebaseAuth } = useFirebaseAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  
+  // Use Firebase user data if available, otherwise fall back to Replit user
+  const currentUser = firebaseUser || user;
+  const isUserAuthenticated = firebaseAuth || isAuthenticated;
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (!isLoading && !isUserAuthenticated) {
       toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
+        title: "Please Sign In",
+        description: "You need to sign in to continue...",
         variant: "destructive",
       });
       setTimeout(() => {
-        window.location.href = "/api/login";
+        setLocation('/');
       }, 500);
       return;
     }
-  }, [isAuthenticated, isLoading, toast]);
+  }, [isUserAuthenticated, isLoading, toast, setLocation]);
 
   const handleRoleSelection = async (role: 'customer' | 'freelancer' | 'admin') => {
     try {
@@ -63,8 +70,26 @@ export default function Home() {
     }
   };
 
-  const handleLogout = () => {
-    window.location.href = "/api/logout";
+  const handleLogout = async () => {
+    try {
+      if (firebaseAuth) {
+        await signOutUser();
+      } else {
+        window.location.href = "/api/logout";
+      }
+      toast({
+        title: "Logged Out",
+        description: "You have been successfully logged out.",
+      });
+      setLocation('/');
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast({
+        title: "Logout Error",
+        description: "Failed to log out. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (isLoading) {
@@ -77,8 +102,8 @@ export default function Home() {
 
   // If user already has a role, redirect to appropriate dashboard
   useEffect(() => {
-    if (user && 'role' in user && user.role && user.role !== null) {
-      switch (user.role) {
+    if (currentUser && 'role' in currentUser && currentUser.role && currentUser.role !== null) {
+      switch (currentUser.role) {
         case 'freelancer':
           setLocation('/freelancer');
           break;
@@ -90,7 +115,7 @@ export default function Home() {
           break;
       }
     }
-  }, [user, setLocation]);
+  }, [currentUser, setLocation]);
 
   return (
     <div className="min-h-screen">
@@ -112,7 +137,7 @@ export default function Home() {
           </div>
           <h1 className="text-2xl font-bold mb-2">Welcome back!</h1>
           <p className="text-purple-100 text-sm">
-            Hello, {(user && 'firstName' in user && user.firstName) || (user && 'email' in user && user.email) || 'User'}
+            Hello, {firebaseUser?.displayName || firebaseUser?.email || (currentUser && 'firstName' in currentUser && currentUser.firstName) || (currentUser && 'email' in currentUser && currentUser.email) || 'User'}
           </p>
         </div>
       </div>

@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
+import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
@@ -15,9 +16,15 @@ import SubscriptionPlans from "@/pages/subscription-plans";
 import Profile from "@/pages/profile";
 
 function Router() {
+  // Use Firebase auth instead of Replit auth for Gmail login
+  const { isAuthenticated: firebaseAuth, isLoading: firebaseLoading } = useFirebaseAuth();
   const { isAuthenticated, isLoading, user } = useAuth();
+  
+  // Prioritize Firebase auth for login state
+  const isUserAuthenticated = firebaseAuth || isAuthenticated;
+  const isUserLoading = firebaseLoading || isLoading;
 
-  if (isLoading) {
+  if (isUserLoading) {
     return (
       <div className="mobile-container">
         <div className="flex items-center justify-center min-h-screen">
@@ -30,7 +37,7 @@ function Router() {
   return (
     <div className="mobile-container">
       <Switch>
-        {!isAuthenticated ? (
+        {!isUserAuthenticated ? (
           <Route path="/" component={Landing} />
         ) : (
           <>

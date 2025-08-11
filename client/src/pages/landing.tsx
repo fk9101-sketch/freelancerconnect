@@ -1,9 +1,31 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { signInWithGoogle } from "@/lib/firebase";
+import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
 
 export default function Landing() {
-  const handleGoogleLogin = () => {
-    window.location.href = "/api/login";
+  const { toast } = useToast();
+  const [, setLocation] = useLocation();
+
+  const handleGoogleLogin = async () => {
+    try {
+      const user = await signInWithGoogle();
+      console.log("User signed in:", user);
+      toast({
+        title: "Welcome!",
+        description: "Successfully signed in with Google",
+      });
+      // Redirect to role selection after successful login
+      setLocation('/');
+    } catch (error) {
+      console.error("Login error:", error);
+      toast({
+        title: "Login Failed",
+        description: "Failed to sign in with Google. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
