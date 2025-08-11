@@ -12,6 +12,7 @@ import FreelancerDashboard from "@/pages/freelancer-dashboard";
 import AdminDashboard from "@/pages/admin-dashboard";
 import JobPosting from "@/pages/job-posting";
 import SubscriptionPlans from "@/pages/subscription-plans";
+import Profile from "@/pages/profile";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -39,6 +40,10 @@ function Router() {
             <Route path="/admin" component={AdminDashboard} />
             <Route path="/post-job" component={JobPosting} />
             <Route path="/plans" component={SubscriptionPlans} />
+            <Route path="/profile" component={Profile} />
+            <Route path="/customer/profile" component={Profile} />
+            <Route path="/freelancer/profile" component={Profile} />
+            <Route path="/admin/profile" component={Profile} />
           </>
         )}
         <Route component={NotFound} />
