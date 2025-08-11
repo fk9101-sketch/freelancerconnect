@@ -15,7 +15,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import type { Category } from "@shared/schema";
 
-const jobPostingSchema = insertLeadSchema.extend({
+const jobPostingSchema = insertLeadSchema.omit({
+  customerId: true, // We'll add this programmatically from the current user
+}).extend({
   budgetMin: z.coerce.number().min(1, "Minimum budget is required"),
   budgetMax: z.coerce.number().min(1, "Maximum budget is required"),
 }).refine((data) => data.budgetMax >= data.budgetMin, {
@@ -26,7 +28,7 @@ const jobPostingSchema = insertLeadSchema.extend({
 type JobPostingForm = z.infer<typeof jobPostingSchema>;
 
 export default function JobPosting() {
-  const { isAuthenticated, isLoading } = useFirebaseAuth();
+  const { isAuthenticated, isLoading, user } = useFirebaseAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -91,64 +93,26 @@ export default function JobPosting() {
   const onSubmit = (data: JobPostingForm) => {
     console.log('Form submission data:', data);
     console.log('Form errors:', form.formState.errors);
+    console.log('Current user:', user);
     
-    // Validate required fields manually
-    if (!data.categoryId) {
+    // Check if user is available
+    if (!user || !user.uid) {
       toast({
-        title: "Validation Error",
-        description: "Please select a service category",
+        title: "Authentication Error",
+        description: "Please log in to post a job",
         variant: "destructive",
       });
       return;
     }
     
-    if (!data.title || data.title.trim().length === 0) {
-      toast({
-        title: "Validation Error", 
-        description: "Please enter a job title",
-        variant: "destructive",
-      });
-      return;
-    }
+    // Add customerId to the data
+    const submitData = {
+      ...data,
+      customerId: user.uid
+    };
     
-    if (!data.description || data.description.trim().length === 0) {
-      toast({
-        title: "Validation Error",
-        description: "Please enter a description",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (!data.budgetMin || data.budgetMin <= 0) {
-      toast({
-        title: "Validation Error",
-        description: "Please enter a valid minimum budget",
-        variant: "destructive", 
-      });
-      return;
-    }
-    
-    if (!data.budgetMax || data.budgetMax <= 0) {
-      toast({
-        title: "Validation Error",
-        description: "Please enter a valid maximum budget",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (!data.location || data.location.trim().length === 0) {
-      toast({
-        title: "Validation Error",
-        description: "Please enter a location",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    console.log('All validations passed, submitting:', data);
-    createLeadMutation.mutate(data);
+    console.log('Final submission data with customerId:', submitData);
+    createLeadMutation.mutate(submitData);
   };
 
   const handleGoBack = () => {
@@ -471,17 +435,9 @@ export default function JobPosting() {
             const isValid = await form.trigger();
             console.log('Form validation result:', isValid);
             
-            if (isValid) {
-              const formData = form.getValues();
-              onSubmit(formData);
-            } else {
-              console.log('Form validation failed:', form.formState.errors);
-              toast({
-                title: "Validation Error",
-                description: "Please fill in all required fields correctly",
-                variant: "destructive",
-              });
-            }
+            // Get form data and call onSubmit directly (validation happens inside onSubmit)
+            const formData = form.getValues();
+            onSubmit(formData);
           }}
           className="w-full text-white py-4 px-6 rounded-xl font-semibold text-lg hover:opacity-90 transition-opacity shadow-lg disabled:opacity-50"
           style={{ 
