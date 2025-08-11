@@ -20,12 +20,27 @@ export default function Landing() {
       setLocation('/');
     } catch (error) {
       console.error("Login error:", error);
-      toast({
-        title: "Login Failed",
-        description: "Failed to sign in with Google. Please try again.",
-        variant: "destructive",
-      });
+      if (error.code === 'auth/popup-closed-by-user') {
+        toast({
+          title: "Login Cancelled",
+          description: "You closed the sign-in window. Please try again.",
+          variant: "default",
+        });
+      } else {
+        toast({
+          title: "Login Failed",
+          description: "Failed to sign in with Google. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
+  };
+
+  const handlePhoneLogin = () => {
+    toast({
+      title: "Coming Soon",
+      description: "Phone authentication will be available soon!",
+    });
   };
 
   return (
@@ -120,7 +135,7 @@ export default function Landing() {
             
             <Button 
               variant="outline"
-              onClick={handleGoogleLogin}
+              onClick={handlePhoneLogin}
               className="w-full border border-gray-300 text-gray-700 py-4 rounded-xl font-medium hover:bg-gray-50 transition-colors"
               data-testid="button-phone-login"
             >
