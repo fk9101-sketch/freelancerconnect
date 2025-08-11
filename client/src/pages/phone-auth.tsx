@@ -106,13 +106,13 @@ export default function PhoneAuth() {
     // Remove all non-digit characters
     const digits = value.replace(/\D/g, '');
     
-    // Add country code if not present
-    if (digits.length > 0 && !digits.startsWith('1')) {
-      return '+1' + digits;
-    } else if (digits.startsWith('1')) {
+    // Add Indian country code if not present
+    if (digits.length > 0 && !digits.startsWith('91')) {
+      return '+91' + digits;
+    } else if (digits.startsWith('91')) {
       return '+' + digits;
     }
-    return '+1';
+    return '+91';
   };
 
   return (
@@ -163,7 +163,7 @@ export default function PhoneAuth() {
                     </label>
                     <Input
                       type="tel"
-                      placeholder="+1 (555) 123-4567"
+                      placeholder="+91 98765 43210"
                       value={phoneNumber}
                       onChange={(e) => setPhoneNumber(formatPhoneNumber(e.target.value))}
                       className="w-full text-lg"
