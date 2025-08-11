@@ -1,4 +1,5 @@
-import { useAuth } from "@/hooks/useAuth";
+import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
+import { signOutUser } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -6,53 +7,56 @@ import { Label } from "@/components/ui/label";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import Navigation from "@/components/navigation";
 
 export default function Profile() {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user: firebaseUser, isAuthenticated, isLoading } = useFirebaseAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
+      setLocation('/');
       return;
     }
-  }, [isAuthenticated, isLoading, toast]);
+  }, [isAuthenticated, isLoading, setLocation]);
 
-  const handleLogout = () => {
-    window.location.href = "/api/logout";
+  const handleLogout = async () => {
+    try {
+      await signOutUser();
+      localStorage.removeItem('selectedRole');
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out.",
+      });
+      setLocation('/');
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast({
+        title: "Logout failed",
+        description: "Failed to log out. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const getUserRole = () => {
-    if (user && 'role' in user && user.role) {
-      return user.role;
-    }
-    return 'customer';
+    return localStorage.getItem('selectedRole') || 'customer';
   };
 
   const getUserName = () => {
-    if (user && 'firstName' in user && user.firstName) {
-      return user.firstName;
+    if (firebaseUser?.displayName) {
+      return firebaseUser.displayName;
     }
-    if (user && 'email' in user && user.email) {
-      return user.email.split('@')[0];
+    if (firebaseUser?.email) {
+      return firebaseUser.email.split('@')[0];
     }
     return 'User';
   };
 
   const getUserEmail = () => {
-    if (user && 'email' in user && user.email) {
-      return user.email;
-    }
-    return '';
+    return firebaseUser?.email || '';
   };
 
   if (isLoading) {
@@ -80,7 +84,7 @@ export default function Profile() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-background pb-20">
       {/* Status Bar */}
       <div className="status-bar">
         <span>9:41 AM</span>
@@ -92,49 +96,49 @@ export default function Profile() {
       </div>
 
       {/* Header */}
-      <div className="bg-gradient-purple text-white p-4">
+      <div className="bg-gradient-purple text-white p-6">
         <div className="flex items-center justify-between mb-4">
           <button 
-            onClick={() => setLocation('/')}
-            className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center"
+            onClick={goBack}
+            className="w-12 h-12 bg-white bg-opacity-20 rounded-2xl flex items-center justify-center hover:bg-white/30 transition-colors"
             data-testid="button-back"
           >
             <i className="fas fa-arrow-left text-lg"></i>
           </button>
-          <h1 className="text-xl font-semibold">Profile</h1>
-          <div className="w-10 h-10"></div> {/* Spacer for alignment */}
+          <h1 className="text-xl font-bold">Profile</h1>
+          <div className="w-12 h-12"></div> {/* Spacer for alignment */}
         </div>
       </div>
 
       {/* Profile Content */}
-      <div className="p-4 -mt-4">
-        <Card className="bg-white rounded-2xl shadow-lg border border-gray-100 mb-6">
-          <CardContent className="p-6">
+      <div className="p-6 -mt-4">
+        <Card className="bg-card rounded-2xl shadow-xl border border-border mb-6">
+          <CardContent className="p-8">
             {/* Profile Picture */}
-            <div className="flex items-center space-x-4 mb-6">
-              <div className="w-20 h-20 bg-gradient-purple rounded-full flex items-center justify-center">
-                {user && 'profileImageUrl' in user && user.profileImageUrl ? (
+            <div className="flex items-center space-x-6 mb-8">
+              <div className="w-24 h-24 bg-gradient-purple rounded-2xl flex items-center justify-center">
+                {firebaseUser?.photoURL ? (
                   <img 
-                    src={user.profileImageUrl} 
+                    src={firebaseUser.photoURL} 
                     alt="Profile" 
-                    className="w-20 h-20 rounded-full object-cover"
+                    className="w-24 h-24 rounded-2xl object-cover"
                   />
                 ) : (
-                  <i className="fas fa-user text-white text-2xl"></i>
+                  <i className="fas fa-user text-white text-3xl"></i>
                 )}
               </div>
               <div className="flex-1">
-                <h2 className="text-xl font-semibold text-on-surface" data-testid="text-user-name">
+                <h2 className="text-2xl font-bold text-card-foreground mb-1" data-testid="text-user-name">
                   {getUserName()}
                 </h2>
-                <p className="text-gray-600 capitalize" data-testid="text-user-role">
+                <p className="text-muted-foreground capitalize mb-3" data-testid="text-user-role">
                   {getUserRole()}
                 </p>
                 <Button
                   onClick={() => setIsEditing(!isEditing)}
                   variant="outline"
                   size="sm"
-                  className="mt-2"
+                  className="border-border hover:bg-card/50"
                   data-testid="button-edit-profile"
                 >
                   <i className="fas fa-edit mr-2"></i>
@@ -144,39 +148,39 @@ export default function Profile() {
             </div>
 
             {/* Profile Details */}
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div>
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-sm font-semibold text-card-foreground mb-2 block">Email</Label>
                 <Input
                   id="email"
                   type="email"
                   value={getUserEmail()}
                   disabled={!isEditing}
-                  className="mt-1"
+                  className="bg-background border-border text-foreground rounded-2xl"
                   data-testid="input-email"
                 />
               </div>
 
               <div>
-                <Label htmlFor="firstName">First Name</Label>
+                <Label htmlFor="firstName" className="text-sm font-semibold text-card-foreground mb-2 block">Full Name</Label>
                 <Input
                   id="firstName"
                   type="text"
                   value={getUserName()}
                   disabled={!isEditing}
-                  className="mt-1"
+                  className="bg-background border-border text-foreground rounded-2xl"
                   data-testid="input-first-name"
                 />
               </div>
 
               <div>
-                <Label htmlFor="role">Role</Label>
+                <Label htmlFor="role" className="text-sm font-semibold text-card-foreground mb-2 block">Role</Label>
                 <Input
                   id="role"
                   type="text"
                   value={getUserRole()}
                   disabled
-                  className="mt-1 capitalize"
+                  className="bg-muted border-border text-muted-foreground rounded-2xl capitalize"
                   data-testid="input-role"
                 />
               </div>
@@ -204,60 +208,60 @@ export default function Profile() {
         </Card>
 
         {/* Account Actions */}
-        <Card className="bg-white rounded-2xl shadow-lg border border-gray-100 mb-6">
-          <CardContent className="p-6">
-            <h3 className="font-semibold text-on-surface mb-4">Account Settings</h3>
+        <Card className="bg-card rounded-2xl shadow-xl border border-border mb-6">
+          <CardContent className="p-8">
+            <h3 className="font-bold text-card-foreground mb-6">Account Settings</h3>
             
-            <div className="space-y-3">
+            <div className="space-y-4">
               <Button
                 variant="ghost"
-                className="w-full justify-start text-left p-3 h-auto"
+                className="w-full justify-start text-left p-4 h-auto hover:bg-card/50 rounded-2xl"
                 onClick={() => setLocation('/plans')}
                 data-testid="button-subscription-plans"
               >
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                    <i className="fas fa-crown text-blue-600"></i>
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-blue-500/20 rounded-2xl flex items-center justify-center">
+                    <i className="fas fa-crown text-blue-400"></i>
                   </div>
                   <div className="flex-1">
-                    <div className="font-medium">Subscription Plans</div>
-                    <div className="text-sm text-gray-600">Manage your subscription</div>
+                    <div className="font-semibold text-card-foreground">Subscription Plans</div>
+                    <div className="text-sm text-muted-foreground">Manage your subscription</div>
                   </div>
-                  <i className="fas fa-chevron-right text-gray-400"></i>
+                  <i className="fas fa-chevron-right text-muted-foreground"></i>
                 </div>
               </Button>
 
               <Button
                 variant="ghost"
-                className="w-full justify-start text-left p-3 h-auto"
+                className="w-full justify-start text-left p-4 h-auto hover:bg-card/50 rounded-2xl"
                 data-testid="button-notifications"
               >
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                    <i className="fas fa-bell text-green-600"></i>
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-green-500/20 rounded-2xl flex items-center justify-center">
+                    <i className="fas fa-bell text-green-400"></i>
                   </div>
                   <div className="flex-1">
-                    <div className="font-medium">Notifications</div>
-                    <div className="text-sm text-gray-600">Manage notification preferences</div>
+                    <div className="font-semibold text-card-foreground">Notifications</div>
+                    <div className="text-sm text-muted-foreground">Manage notification preferences</div>
                   </div>
-                  <i className="fas fa-chevron-right text-gray-400"></i>
+                  <i className="fas fa-chevron-right text-muted-foreground"></i>
                 </div>
               </Button>
 
               <Button
                 variant="ghost"
-                className="w-full justify-start text-left p-3 h-auto"
+                className="w-full justify-start text-left p-4 h-auto hover:bg-card/50 rounded-2xl"
                 data-testid="button-privacy"
               >
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                    <i className="fas fa-shield-alt text-purple-600"></i>
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-purple-500/20 rounded-2xl flex items-center justify-center">
+                    <i className="fas fa-shield-alt text-purple-400"></i>
                   </div>
                   <div className="flex-1">
-                    <div className="font-medium">Privacy & Security</div>
-                    <div className="text-sm text-gray-600">Manage privacy settings</div>
+                    <div className="font-semibold text-card-foreground">Privacy & Security</div>
+                    <div className="text-sm text-muted-foreground">Manage privacy settings</div>
                   </div>
-                  <i className="fas fa-chevron-right text-gray-400"></i>
+                  <i className="fas fa-chevron-right text-muted-foreground"></i>
                 </div>
               </Button>
             </div>
@@ -265,21 +269,21 @@ export default function Profile() {
         </Card>
 
         {/* Logout */}
-        <Card className="bg-white rounded-2xl shadow-lg border border-gray-100">
-          <CardContent className="p-6">
+        <Card className="bg-card rounded-2xl shadow-xl border border-border">
+          <CardContent className="p-8">
             <Button
               onClick={handleLogout}
               variant="ghost"
-              className="w-full justify-start text-left p-3 h-auto text-red-600 hover:bg-red-50"
+              className="w-full justify-start text-left p-4 h-auto text-red-400 hover:bg-red-500/20 rounded-2xl"
               data-testid="button-logout"
             >
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                  <i className="fas fa-sign-out-alt text-red-600"></i>
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-red-500/20 rounded-2xl flex items-center justify-center">
+                  <i className="fas fa-sign-out-alt text-red-400"></i>
                 </div>
                 <div className="flex-1">
-                  <div className="font-medium">Logout</div>
-                  <div className="text-sm text-gray-600">Sign out of your account</div>
+                  <div className="font-semibold">Logout</div>
+                  <div className="text-sm text-muted-foreground">Sign out of your account</div>
                 </div>
               </div>
             </Button>
@@ -288,42 +292,7 @@ export default function Profile() {
       </div>
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white border-t border-gray-200">
-        <div className="flex items-center justify-around py-2">
-          <button 
-            onClick={() => setLocation('/')}
-            className="flex flex-col items-center space-y-1 py-2 px-4"
-            data-testid="nav-home"
-          >
-            <i className="fas fa-home text-gray-400 text-xl"></i>
-            <span className="text-xs text-gray-400">Home</span>
-          </button>
-          
-          <button 
-            className="flex flex-col items-center space-y-1 py-2 px-4"
-            data-testid="nav-search"
-          >
-            <i className="fas fa-search text-gray-400 text-xl"></i>
-            <span className="text-xs text-gray-400">Search</span>
-          </button>
-          
-          <button 
-            className="flex flex-col items-center space-y-1 py-2 px-4"
-            data-testid="nav-requests"
-          >
-            <i className="fas fa-list text-gray-400 text-xl"></i>
-            <span className="text-xs text-gray-400">Requests</span>
-          </button>
-          
-          <button 
-            className="flex flex-col items-center space-y-1 py-2 px-4"
-            data-testid="nav-profile"
-          >
-            <i className="fas fa-user text-purple-600 text-xl"></i>
-            <span className="text-xs text-purple-600">Profile</span>
-          </button>
-        </div>
-      </div>
+      <Navigation currentPage="profile" userRole={getUserRole()} />
     </div>
   );
 }
