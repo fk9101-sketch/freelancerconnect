@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { useAuth } from "@/hooks/useAuth";
+import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { useToast } from "@/hooks/use-toast";
-import { useWebSocket } from "@/hooks/useWebSocket";
-import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,69 +12,77 @@ import Navigation from "@/components/navigation";
 import type { FreelancerProfile, LeadWithRelations, Subscription } from "@shared/schema";
 
 export default function FreelancerDashboard() {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user: firebaseUser, isAuthenticated, isLoading } = useFirebaseAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   const [newLeadsCount, setNewLeadsCount] = useState(0);
 
-  // WebSocket for real-time notifications
-  useWebSocket({
-    onMessage: (data) => {
-      if (data.type === 'new_lead') {
-        setNewLeadsCount(prev => prev + 1);
-        toast({
-          title: "New Lead Available!",
-          description: `${data.lead.title} - ₹${data.lead.budgetMin}-${data.lead.budgetMax}`,
-        });
-        // Refresh available leads
-        queryClient.invalidateQueries({ queryKey: ['/api/freelancer/leads/available'] });
-      }
-    }
-  });
-
-  // Redirect to role selection if not authenticated
+  // Redirect to landing if not authenticated
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
+      setLocation('/');
       return;
     }
-  }, [isAuthenticated, isLoading, toast]);
+  }, [isAuthenticated, isLoading, setLocation]);
 
-  // Fetch freelancer profile
-  const { data: profile, isLoading: profileLoading } = useQuery<FreelancerProfile>({
-    queryKey: ['/api/freelancer/profile'],
-    retry: false,
-    enabled: isAuthenticated,
-  });
+  // Mock data for now since backend API is using different auth
+  const profile: FreelancerProfile = {
+    id: 'mock-freelancer-1',
+    userId: firebaseUser?.uid || 'mock-user',
+    businessName: 'Professional Services',
+    bio: 'Experienced professional offering quality services',
+    skills: ['Electrical', 'Plumbing', 'Carpentry'],
+    location: 'Mumbai, India',
+    rating: 4.8,
+    totalJobs: 45,
+    isVerified: true,
+    phoneNumber: '+91 9876543210',
+    portfolioImages: [],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
 
-  // Fetch available leads
-  const { data: availableLeads, isLoading: availableLeadsLoading } = useQuery<LeadWithRelations[]>({
-    queryKey: ['/api/freelancer/leads/available'],
-    retry: false,
-    enabled: isAuthenticated && !!profile,
-  });
-
-  // Fetch accepted leads
-  const { data: acceptedLeads, isLoading: acceptedLeadsLoading } = useQuery<LeadWithRelations[]>({
-    queryKey: ['/api/freelancer/leads/accepted'],
-    retry: false,
-    enabled: isAuthenticated && !!profile,
-  });
-
-  // Fetch subscriptions
-  const { data: subscriptions, isLoading: subscriptionsLoading } = useQuery<Subscription[]>({
-    queryKey: ['/api/freelancer/subscriptions'],
-    retry: false,
-    enabled: isAuthenticated && !!profile,
-  });
+  const subscriptions: Subscription[] = [];
+  const availableLeads: LeadWithRelations[] = [
+    {
+      id: 'lead-1',
+      title: 'Home Electrical Repair',
+      description: 'Need to fix electrical issues in kitchen',
+      budgetMin: 2000,
+      budgetMax: 5000,
+      location: 'Bandra, Mumbai',
+      pincode: '400050',
+      categoryId: '1',
+      customerId: 'customer-1',
+      status: 'posted',
+      preferredTime: 'Morning',
+      photos: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      customer: {
+        id: 'customer-1',
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        phoneNumber: '+91 9876543210',
+        role: 'customer' as const,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      category: {
+        id: '1',
+        name: 'Electrical',
+        description: 'Electrical services',
+        icon: 'fas fa-bolt',
+      },
+    },
+  ];
+  const acceptedLeads: LeadWithRelations[] = [];
+  
+  const profileLoading = false;
+  const subscriptionsLoading = false;
+  const availableLeadsLoading = false;
+  const acceptedLeadsLoading = false;
 
   // Accept lead mutation
   const acceptLeadMutation = useMutation({

@@ -17,15 +17,10 @@ import Profile from "@/pages/profile";
 import PhoneAuth from "@/pages/phone-auth";
 
 function Router() {
-  // Use Firebase auth instead of Replit auth for Gmail login
-  const { isAuthenticated: firebaseAuth, isLoading: firebaseLoading } = useFirebaseAuth();
-  const { isAuthenticated, isLoading, user } = useAuth();
-  
-  // Prioritize Firebase auth for login state
-  const isUserAuthenticated = firebaseAuth || isAuthenticated;
-  const isUserLoading = firebaseLoading || isLoading;
+  // Use Firebase auth for authentication state
+  const { user: firebaseUser, isLoading: firebaseLoading, isAuthenticated: firebaseAuth } = useFirebaseAuth();
 
-  if (isUserLoading) {
+  if (firebaseLoading) {
     return (
       <div className="mobile-container">
         <div className="flex items-center justify-center min-h-screen">
@@ -38,7 +33,7 @@ function Router() {
   return (
     <div className="mobile-container">
       <Switch>
-        {!isUserAuthenticated ? (
+        {!firebaseAuth ? (
           <>
             <Route path="/" component={Landing} />
             <Route path="/phone-auth" component={PhoneAuth} />
