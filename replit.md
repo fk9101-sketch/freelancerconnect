@@ -42,10 +42,12 @@ Preferred communication style: Simple, everyday language.
 - **Relationships**: Well-defined foreign key relationships with proper indexing for performance
 
 ### Authentication & Authorization
-- **Primary Auth**: Replit OIDC integration with Google OAuth support
-- **Session Strategy**: Server-side sessions with PostgreSQL storage for security
+- **Primary Auth**: Firebase Authentication with Google OAuth and Phone number authentication
+- **Google Sign-in**: Full account selection interface with proper Gmail integration
+- **Phone Authentication**: SMS-based OTP verification with reCAPTCHA protection
+- **Session Strategy**: Firebase Auth state management with real-time user monitoring
 - **Role Management**: Dynamic role assignment after initial authentication
-- **Security Features**: CSRF protection, secure cookies, and session expiration handling
+- **Security Features**: Firebase security rules, reCAPTCHA verification, and secure token handling
 
 ### Real-time Features
 - **WebSocket Server**: Custom WebSocket implementation for real-time notifications

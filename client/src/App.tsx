@@ -14,6 +14,7 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import JobPosting from "@/pages/job-posting";
 import SubscriptionPlans from "@/pages/subscription-plans";
 import Profile from "@/pages/profile";
+import PhoneAuth from "@/pages/phone-auth";
 
 function Router() {
   // Use Firebase auth instead of Replit auth for Gmail login
@@ -38,7 +39,10 @@ function Router() {
     <div className="mobile-container">
       <Switch>
         {!isUserAuthenticated ? (
-          <Route path="/" component={Landing} />
+          <>
+            <Route path="/" component={Landing} />
+            <Route path="/phone-auth" component={PhoneAuth} />
+          </>
         ) : (
           <>
             <Route path="/" component={Home} />

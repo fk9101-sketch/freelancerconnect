@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, RecaptchaVerifier, signInWithPhoneNumber, type ConfirmationResult } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -28,6 +28,36 @@ export const signInWithGoogle = async () => {
     return result.user;
   } catch (error) {
     console.error("Error signing in with Google:", error);
+    throw error;
+  }
+};
+
+// Phone authentication
+export const setupRecaptcha = (containerId: string) => {
+  return new RecaptchaVerifier(auth, containerId, {
+    size: 'invisible',
+    callback: () => {
+      console.log("reCAPTCHA solved");
+    },
+  });
+};
+
+export const sendOTP = async (phoneNumber: string, recaptcha: RecaptchaVerifier) => {
+  try {
+    const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptcha);
+    return confirmationResult;
+  } catch (error) {
+    console.error("Error sending OTP:", error);
+    throw error;
+  }
+};
+
+export const verifyOTP = async (confirmationResult: ConfirmationResult, otp: string) => {
+  try {
+    const result = await confirmationResult.confirm(otp);
+    return result.user;
+  } catch (error) {
+    console.error("Error verifying OTP:", error);
     throw error;
   }
 };

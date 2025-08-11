@@ -37,10 +37,7 @@ export default function Landing() {
   };
 
   const handlePhoneLogin = () => {
-    toast({
-      title: "Coming Soon",
-      description: "Phone authentication will be available soon!",
-    });
+    setLocation('/phone-auth');
   };
 
   return (
