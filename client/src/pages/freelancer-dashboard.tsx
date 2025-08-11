@@ -4,6 +4,7 @@ import { useLocation } from "wouter";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { isUnauthorizedError } from "@/lib/authUtils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +16,7 @@ export default function FreelancerDashboard() {
   const { user: firebaseUser, isAuthenticated, isLoading } = useFirebaseAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [newLeadsCount, setNewLeadsCount] = useState(0);
 
   // Redirect to landing if not authenticated
@@ -29,15 +31,14 @@ export default function FreelancerDashboard() {
   const profile: FreelancerProfile = {
     id: 'mock-freelancer-1',
     userId: firebaseUser?.uid || 'mock-user',
-    businessName: 'Professional Services',
+    categoryId: '1',
+    workingAreas: ['Mumbai', 'Navi Mumbai'],
     bio: 'Experienced professional offering quality services',
-    skills: ['Electrical', 'Plumbing', 'Carpentry'],
-    location: 'Mumbai, India',
-    rating: 4.8,
-    totalJobs: 45,
-    isVerified: true,
-    phoneNumber: '+91 9876543210',
-    portfolioImages: [],
+    experience: '5 years',
+    isAvailable: true,
+    verificationStatus: 'approved',
+    profileCompletionScore: 85,
+    lastSeen: new Date(),
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -54,7 +55,7 @@ export default function FreelancerDashboard() {
       pincode: '400050',
       categoryId: '1',
       customerId: 'customer-1',
-      status: 'posted',
+      status: 'pending',
       preferredTime: 'Morning',
       photos: [],
       createdAt: new Date(),
@@ -64,16 +65,18 @@ export default function FreelancerDashboard() {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@example.com',
-        phoneNumber: '+91 9876543210',
         role: 'customer' as const,
+        profileImageUrl: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       category: {
         id: '1',
         name: 'Electrical',
-        description: 'Electrical services',
+        color: '#FFA500',
         icon: 'fas fa-bolt',
+        createdAt: new Date(),
+        isActive: true,
       },
     },
   ];
@@ -189,7 +192,7 @@ export default function FreelancerDashboard() {
   }
 
   return (
-    <div className="min-h-screen pb-20">
+    <div className="min-h-screen pb-20 bg-background text-foreground">
       {/* Status Bar */}
       <div className="status-bar">
         <span>9:41 AM</span>
@@ -201,28 +204,31 @@ export default function FreelancerDashboard() {
       </div>
 
       {/* Header */}
-      <div className="bg-gradient-purple text-white p-4">
-        <div className="flex items-center justify-between mb-4">
+      <div className="bg-gradient-purple text-white p-6">
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-lg font-semibold" data-testid="text-freelancer-greeting">
-              Welcome, {user?.firstName || 'Freelancer'}!
+            <h2 className="text-xl font-bold mb-1" data-testid="text-freelancer-greeting">
+              Welcome, {firebaseUser?.displayName || firebaseUser?.email?.split('@')[0] || 'Freelancer'}!
             </h2>
-            <div className="flex items-center space-x-2">
-              <span className="text-purple-100 text-sm">{profile.category?.name || 'Freelancer'}</span>
-              <div className="flex items-center space-x-1">
-                <span className="bg-green-500 w-2 h-2 rounded-full"></span>
-                <span className="text-xs text-purple-100">Online</span>
+            <div className="flex items-center space-x-3">
+              <span className="text-purple-100">Professional Freelancer</span>
+              <div className="flex items-center space-x-2">
+                <span className="bg-green-400 w-2 h-2 rounded-full"></span>
+                <span className="text-xs text-purple-200">Available</span>
               </div>
             </div>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-3">
             {profile.verificationStatus === 'approved' && (
-              <Badge className="badge-verified">VERIFIED</Badge>
+              <Badge className="bg-green-500/20 text-green-300 border-green-500/30">
+                <i className="fas fa-check-circle mr-1"></i>
+                VERIFIED
+              </Badge>
             )}
             <div className="relative">
-              <i className="fas fa-bell text-lg"></i>
+              <i className="fas fa-bell text-xl opacity-80"></i>
               {newLeadsCount > 0 && (
-                <span className="notification-dot" data-testid="notification-dot">
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center" data-testid="notification-dot">
                   {newLeadsCount}
                 </span>
               )}
