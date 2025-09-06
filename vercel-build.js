@@ -58,11 +58,15 @@ try {
   }
   
   // Copy the API handler if it doesn't exist
-  if (!fs.existsSync('api/index.js')) {
+  if (!fs.existsSync('api/index.mjs')) {
     console.log('API handler not found, creating placeholder...');
-    fs.writeFileSync('api/index.js', `const express = require('express');
-const path = require('path');
-const fs = require('fs');
+    fs.writeFileSync('api/index.mjs', `import express from 'express';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(express.json());
@@ -89,7 +93,7 @@ app.get('*', (req, res) => {
   }
 });
 
-module.exports = app;`);
+export default app;`);
   }
 
   console.log('Vercel build completed successfully!');

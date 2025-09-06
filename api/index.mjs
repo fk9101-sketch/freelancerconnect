@@ -1,6 +1,11 @@
-const express = require('express');
-const path = require('path');
-const fs = require('fs');
+import express from 'express';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+// ES module equivalent of __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -121,5 +126,5 @@ app.use('*', (req, res) => {
   }
 });
 
-// Export for Vercel
-module.exports = app;
+// Export for Vercel (ES module syntax)
+export default app;
