@@ -1,6 +1,3 @@
-// Simple Node.js API handler for Vercel
-// Using standard exports to avoid ES module issues
-
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
@@ -15,13 +12,13 @@ app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 app.get('/health', (req, res) => {
   res.status(200).json({ 
     success: true,
-    message: 'Server is running - CommonJS Fixed - Cache Cleared',
+    message: 'Server is running - Vercel Build Fixed',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'production',
     moduleType: 'CommonJS',
-    version: '4.0.0',
+    version: '5.0.0',
     handler: 'api/index.js',
-    status: 'FINAL_FIX_APPLIED'
+    status: 'SINGLE_SHOT_FIX_APPLIED'
   });
 });
 
@@ -29,7 +26,7 @@ app.get('/health', (req, res) => {
 app.use('/api/*', (req, res) => {
   res.status(404).json({ 
     success: false,
-    message: `API endpoint not found: ${req.method} ${req.path}` 
+    message: `API endpoint not found: ${req.method} ${req.path}`
   });
 });
 
