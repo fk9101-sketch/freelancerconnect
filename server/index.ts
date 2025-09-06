@@ -99,7 +99,13 @@ app.use((req, res, next) => {
     await setupVite(app, server);
   } else {
     console.log("Setting up static file serving for production");
-    serveStatic(app);
+    try {
+      serveStatic(app);
+      console.log("Static file serving configured successfully");
+    } catch (error) {
+      console.error("Failed to setup static file serving:", error);
+      throw error;
+    }
   }
 
   // ALWAYS serve the app on the port specified in the environment variable PORT
