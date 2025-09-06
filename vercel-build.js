@@ -58,15 +58,11 @@ try {
   }
   
   // Copy the API handler if it doesn't exist
-  if (!fs.existsSync('api/handler.mjs')) {
+  if (!fs.existsSync('api/index.js')) {
     console.log('API handler not found, creating placeholder...');
-    fs.writeFileSync('api/handler.mjs', `import express from 'express';
-import path from 'path';
-import fs from 'fs';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+    fs.writeFileSync('api/index.js', `const express = require('express');
+const path = require('path');
+const fs = require('fs');
 
 const app = express();
 app.use(express.json());
@@ -74,26 +70,23 @@ app.use(express.urlencoded({ extended: false }));
 
 // Health check
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    version: '3.0.0',
+    handler: 'api/index.js'
+  });
 });
 
-// Serve static files
-const staticPath = path.join(__dirname, '..', 'dist', 'public');
-if (fs.existsSync(staticPath)) {
-  app.use(express.static(staticPath));
-}
-
-// Catch-all handler for SPA
-app.get('*', (req, res) => {
-  const indexPath = path.join(staticPath, 'index.html');
-  if (fs.existsSync(indexPath)) {
-    res.sendFile(indexPath);
-  } else {
-    res.status(200).send('<!DOCTYPE html><html><head><title>HireLocal</title></head><body><h1>Loading...</h1></body></html>');
-  }
+// API routes placeholder
+app.use('/api/*', (req, res) => {
+  res.status(404).json({ 
+    success: false,
+    message: \`API endpoint not found: \${req.method} \${req.path}\`
+  });
 });
 
-export default app;`);
+module.exports = app;`);
   }
 
   console.log('Vercel build completed successfully!');
