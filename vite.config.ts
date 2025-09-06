@@ -47,5 +47,8 @@ export default defineConfig({
   // Add this for Vercel detection
   define: {
     __VITE_APP__: JSON.stringify(true)
-  }
+  },
+  // Ensure proper build output for Vercel
+  base: "/",
+  publicDir: "public"
 });

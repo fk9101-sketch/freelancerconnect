@@ -1,5 +1,9 @@
 {
   "version": 2,
+  "buildCommand": "npm run vercel-build",
+  "outputDirectory": "dist/public",
+  "installCommand": "npm install",
+  "framework": "vite",
   "builds": [
     {
       "src": "package.json",
@@ -9,7 +13,7 @@
       }
     },
     {
-      "src": "api/index.js",
+      "src": "dist/index.js",
       "use": "@vercel/node"
     }
   ],
@@ -22,5 +26,13 @@
       "src": "/(.*)",
       "dest": "/api/index.js"
     }
-  ]
+  ],
+  "functions": {
+    "api/index.js": {
+      "maxDuration": 30
+    }
+  },
+  "env": {
+    "NODE_ENV": "production"
+  }
 }
