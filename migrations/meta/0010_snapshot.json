@@ -1,0 +1,12 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "id": "0010_fix_constraint_conflict",
+  "prevId": "0009_add_reviews_table",
+  "tables": {},
+  "enums": {},
+  "schemas": {},
+  "tablesOrder": [],
+  "enumsOrder": [],
+  "schemasOrder": []
+}

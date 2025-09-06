@@ -1,13 +1,15 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, RecaptchaVerifier, signInWithPhoneNumber, type ConfirmationResult } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, RecaptchaVerifier, signInWithPhoneNumber, type ConfirmationResult, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebaseapp.com`,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebasestorage.app`,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: "AIzaSyC4n_Cum0CvMyrIIWiehMltWO92MYnCvgw",
+  authDomain: "freelancer-connect-899a8.firebaseapp.com",
+  projectId: "freelancer-connect-899a8",
+  storageBucket: "freelancer-connect-899a8.firebasestorage.app",
+  messagingSenderId: "224541104230",
+  appId: "1:224541104230:web:62bb08bdd9ae55872a35a7",
+  measurementId: "G-GXMBYGFZPF"
 };
 
 // Initialize Firebase
@@ -20,14 +22,47 @@ export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 googleProvider.addScope('email');
 googleProvider.addScope('profile');
+googleProvider.setCustomParameters({
+  prompt: 'select_account'
+});
 
 // Sign in with Google
 export const signInWithGoogle = async () => {
   try {
     const result = await signInWithPopup(auth, googleProvider);
     return result.user;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error signing in with Google:", error);
+    
+    // Handle specific popup errors
+    if (error.code === 'auth/cancelled-popup-request' || 
+        error.code === 'auth/popup-closed-by-user') {
+      console.log("Popup was cancelled or closed by user");
+      return null;
+    }
+    
+    throw error;
+  }
+};
+
+// Sign up with email and password
+export const signUpWithEmail = async (email: string, password: string) => {
+  try {
+    const result = await createUserWithEmailAndPassword(auth, email, password);
+    return result.user;
+  } catch (error) {
+    console.error("Error signing up with email:", error);
+    throw error;
+  }
+};
+
+// Sign in with email and password
+export const signInWithEmail = async (email: string, password: string) => {
+  try {
+    const result = await signInWithEmailAndPassword(auth, email, password);
+    return result.user;
+  } catch (error) {
+    console.error("Error signing in with email:", error);
     throw error;
   }
 };

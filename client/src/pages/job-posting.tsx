@@ -20,6 +20,9 @@ const jobPostingSchema = insertLeadSchema.omit({
 }).extend({
   budgetMin: z.coerce.number().min(1, "Minimum budget is required"),
   budgetMax: z.coerce.number().min(1, "Maximum budget is required"),
+  mobileNumber: z.string()
+    .min(1, "Mobile number is required")
+    .regex(/^\+91[0-9]{10}$/, "Please enter a valid 10-digit mobile number"),
 }).refine((data) => data.budgetMax >= data.budgetMin, {
   message: "Maximum budget must be greater than or equal to minimum budget",
   path: ["budgetMax"],
@@ -61,6 +64,7 @@ export default function JobPosting() {
       budgetMin: 0,
       budgetMax: 0,
       location: "",
+      mobileNumber: "+91",
       pincode: "",
       preferredTime: "",
       categoryId: preSelectedCategory || "",
@@ -159,16 +163,6 @@ export default function JobPosting() {
 
   return (
     <div className="min-h-screen bg-background text-foreground relative">
-      {/* Status Bar */}
-      <div className="status-bar">
-        <span>9:41 AM</span>
-        <div className="flex space-x-1">
-          <i className="fas fa-signal"></i>
-          <i className="fas fa-wifi"></i>
-          <i className="fas fa-battery-three-quarters"></i>
-        </div>
-      </div>
-
       {/* Header */}
       <div className="bg-gradient-purple text-white p-6 flex items-center">
         <Button
@@ -347,6 +341,44 @@ export default function JobPosting() {
                 Use current location
               </Button>
             </div>
+
+            {/* Mobile Number */}
+            <FormField
+              control={form.control}
+              name="mobileNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="block text-sm font-semibold text-foreground mb-2">
+                    Mobile Number
+                  </FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <span className="text-muted-foreground text-sm font-medium">+91</span>
+                      </div>
+                      <Input
+                        {...field}
+                        type="tel"
+                        placeholder="Enter 10-digit mobile number"
+                        className="w-full bg-card border border-border rounded-2xl px-4 py-4 pl-12 text-card-foreground placeholder-muted-foreground focus:border-primary focus:ring-primary shadow-sm"
+                        data-testid="input-mobile-number"
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          // Only allow numeric digits
+                          const numericValue = value.replace(/[^0-9]/g, '');
+                          // Limit to 10 digits
+                          const limitedValue = numericValue.slice(0, 10);
+                          field.onChange(`+91${limitedValue}`);
+                        }}
+                        value={field.value.replace('+91', '')}
+                        maxLength={10}
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             {/* Pincode */}
             <FormField

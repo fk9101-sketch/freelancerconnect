@@ -1,32 +1,141 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { signInWithGoogle } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+import { useUserProfile } from "@/hooks/useUserProfile";
+import { hasAdminAccess } from "@/lib/roleUtils";
+import { apiRequest } from "@/lib/queryClient";
+import { SignupForm } from "@/components/signup-form";
+import { FreelancerSignupForm } from "@/components/freelancer-signup-form";
+import { LoginForm } from "@/components/login-form";
 
 export default function Landing() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const { userProfile } = useUserProfile();
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
+  const [authMode, setAuthMode] = useState<'login' | 'signup' | null>(null);
+
+  // Debug logging
+  console.log('Landing component state:', { selectedRole, authMode });
+
+  // Handle URL parameters for direct navigation to signup/login
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const role = urlParams.get('role');
+    const mode = urlParams.get('mode');
+    
+    if (role && ['customer', 'freelancer', 'admin'].includes(role)) {
+      setSelectedRole(role);
+      localStorage.setItem('selectedRole', role);
+    }
+    
+    if (mode && ['login', 'signup'].includes(mode)) {
+      setAuthMode(mode as 'login' | 'signup');
+    }
+  }, []);
 
   const handleGoogleLogin = async (role: string) => {
     try {
+      console.log("Starting Google Sign-In process for role:", role);
       const user = await signInWithGoogle();
       console.log("User signed in:", user);
       
-      // Store the selected role for later use
-      localStorage.setItem('selectedRole', role);
-      
-      toast({
-        title: "Welcome!",
-        description: `Successfully signed in as ${role}`,
-      });
-      // Redirect to role selection after successful login
-      setLocation('/');
-    } catch (error) {
+      if (user) {
+        console.log("User details:", {
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          photoURL: user.photoURL
+        });
+        
+        // Create or update user in backend
+        try {
+          console.log("Creating/updating user in backend...");
+          const response = await apiRequest('POST', '/api/auth/google-signin', { 
+            user: {
+              uid: user.uid,
+              email: user.email,
+              displayName: user.displayName,
+              photoURL: user.photoURL
+            }, 
+            role 
+          });
+          
+          const responseData = await response.json();
+          console.log('User created/updated in backend:', responseData);
+          
+          if (responseData.success) {
+            // Get the actual user role from backend response
+            const actualUserRole = responseData.user.role;
+            
+            // Verify that the selected role matches the actual user role
+            if (actualUserRole !== role) {
+              // Role mismatch - show error and redirect to appropriate login
+              toast({
+                title: "Role Mismatch",
+                description: `This account is registered as a ${actualUserRole}. Please use the ${actualUserRole} login instead.`,
+                variant: "destructive",
+              });
+              
+              // Redirect to the correct role selection
+              setTimeout(() => {
+                window.location.href = `/?role=${actualUserRole}&mode=login`;
+              }, 2000);
+              return;
+            }
+            
+            // Store the verified role
+            localStorage.setItem('selectedRole', actualUserRole);
+            
+            toast({
+              title: "Welcome!",
+              description: `Successfully signed in as ${actualUserRole}`,
+            });
+            
+            console.log("Redirecting to dashboard for role:", actualUserRole);
+            // Redirect based on the verified role
+            if (actualUserRole === 'customer') {
+              setLocation('/customer');
+            } else if (actualUserRole === 'freelancer') {
+              setLocation('/freelancer');
+            } else if (actualUserRole === 'admin') {
+              setLocation('/admin');
+            }
+          }
+        } catch (error) {
+          console.error('Failed to create/update user in backend:', error);
+          // If backend fails, still allow login with selected role
+          localStorage.setItem('selectedRole', role);
+          
+          toast({
+            title: "Welcome!",
+            description: `Successfully signed in as ${role}`,
+          });
+          
+          // Redirect based on selected role
+          if (role === 'customer') {
+            setLocation('/customer');
+          } else if (role === 'freelancer') {
+            setLocation('/freelancer');
+          } else {
+            setLocation('/');
+          }
+        }
+      } else {
+        // User cancelled the popup
+        console.log("User cancelled the sign-in process");
+        toast({
+          title: "Login Cancelled",
+          description: "You cancelled the sign-in process. Please try again.",
+          variant: "default",
+        });
+      }
+    } catch (error: any) {
       console.error("Login error:", error);
-      if (error.code === 'auth/popup-closed-by-user') {
+      if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
         toast({
           title: "Login Cancelled",
           description: "You closed the sign-in window. Please try again.",
@@ -42,9 +151,19 @@ export default function Landing() {
     }
   };
 
-  const handlePhoneLogin = (role: string) => {
+  const handlePhoneLogin = async (role: string) => {
     // Store the selected role for later use
     localStorage.setItem('selectedRole', role);
+    
+    // Update user role in backend if user is authenticated
+    try {
+      await apiRequest('POST', '/api/auth/select-role', { role });
+      console.log('User role updated in backend');
+    } catch (error) {
+      console.error('Failed to update user role in backend:', error);
+      // Continue anyway, the role is stored in localStorage
+    }
+    
     setLocation('/phone-auth');
   };
 
@@ -53,21 +172,22 @@ export default function Landing() {
   };
 
   const goBack = () => {
-    setSelectedRole(null);
+    if (authMode) {
+      // If we're in a form (login/signup), just go back to login options
+      setAuthMode(null);
+    } else if (selectedRole) {
+      // If we're in login options, go back to role selection
+      setSelectedRole(null);
+    }
+  };
+
+  const handleAuthModeSelect = (mode: 'login' | 'signup') => {
+    console.log('handleAuthModeSelect called with:', { mode, selectedRole });
+    setAuthMode(mode);
   };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Status Bar */}
-      <div className="status-bar">
-        <span>9:41 AM</span>
-        <div className="flex space-x-1">
-          <i className="fas fa-signal"></i>
-          <i className="fas fa-wifi"></i>
-          <i className="fas fa-battery-three-quarters"></i>
-        </div>
-      </div>
-
       {/* Hero Section */}
       <div className="bg-gradient-purple text-white p-8 pb-16">
         <div className="text-center">
@@ -129,25 +249,47 @@ export default function Landing() {
                 </CardContent>
               </Card>
 
-              <Card 
-                className="bg-card/50 backdrop-blur-sm rounded-2xl shadow-lg border border-border cursor-pointer hover:shadow-xl hover:scale-105 transition-all duration-200"
-                onClick={() => handleRoleSelect('admin')}
-                data-testid="card-admin-role"
-              >
-                <CardContent className="p-6">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-16 h-16 bg-purple-500/20 rounded-2xl flex items-center justify-center">
-                      <i className="fas fa-cog text-purple-400 text-2xl"></i>
+              {/* Only show Admin Portal card if user has admin access */}
+              {hasAdminAccess(userProfile) && (
+                <Card 
+                  className="bg-card/50 backdrop-blur-sm rounded-2xl shadow-lg border border-border cursor-pointer hover:shadow-xl hover:scale-105 transition-all duration-200"
+                  onClick={() => handleRoleSelect('admin')}
+                  data-testid="card-admin-role"
+                >
+                  <CardContent className="p-6">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-16 h-16 bg-purple-500/20 rounded-2xl flex items-center justify-center">
+                        <i className="fas fa-cog text-purple-400 text-2xl"></i>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-bold text-card-foreground text-lg">Admin Portal</h3>
+                        <p className="text-muted-foreground text-sm">Manage platform operations</p>
+                      </div>
+                      <i className="fas fa-chevron-right text-primary"></i>
                     </div>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-card-foreground text-lg">Admin Portal</h3>
-                      <p className="text-muted-foreground text-sm">Manage platform operations</p>
-                    </div>
-                    <i className="fas fa-chevron-right text-primary"></i>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              )}
             </div>
+          ) : authMode ? (
+            /* Email Authentication Forms */
+            authMode === 'signup' ? (
+              selectedRole === 'freelancer' ? (
+                <FreelancerSignupForm 
+                  onBack={() => setAuthMode(null)} 
+                />
+              ) : (
+                <SignupForm 
+                  role={selectedRole as 'customer'} 
+                  onBack={() => setAuthMode(null)} 
+                />
+              )
+            ) : (
+              <LoginForm 
+                role={selectedRole as 'customer' | 'freelancer'} 
+                onBack={() => setAuthMode(null)} 
+              />
+            )
           ) : (
             /* Login Options for Selected Role */
             <div className="space-y-6">
@@ -220,6 +362,44 @@ export default function Landing() {
                         <span>Continue with Phone</span>
                       </div>
                     </Button>
+
+                    {/* Email Authentication Options */}
+                    {selectedRole !== 'admin' && (
+                      <>
+                        <div className="relative my-6">
+                          <div className="absolute inset-0 flex items-center">
+                            <span className="w-full border-t border-border" />
+                          </div>
+                          <div className="relative flex justify-center text-xs uppercase">
+                            <span className="bg-card px-2 text-muted-foreground">Or continue with email</span>
+                          </div>
+                        </div>
+
+                        <div className="space-y-3">
+                          <Button 
+                            variant="outline"
+                            onClick={() => handleAuthModeSelect('signup')}
+                            className="w-full border-2 border-border bg-card text-card-foreground py-4 rounded-2xl font-semibold hover:scale-105 hover:shadow-lg transition-all duration-200"
+                          >
+                            <div className="flex items-center justify-center space-x-3">
+                              <i className="fas fa-user-plus text-primary"></i>
+                              <span>Sign Up with Email</span>
+                            </div>
+                          </Button>
+                          
+                          <Button 
+                            variant="outline"
+                            onClick={() => handleAuthModeSelect('login')}
+                            className="w-full border-2 border-border bg-card text-card-foreground py-4 rounded-2xl font-semibold hover:scale-105 hover:shadow-lg transition-all duration-200"
+                          >
+                            <div className="flex items-center justify-center space-x-3">
+                              <i className="fas fa-sign-in-alt text-primary"></i>
+                              <span>Sign In with Email</span>
+                            </div>
+                          </Button>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </CardContent>
               </Card>

@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { setupRecaptcha, sendOTP, verifyOTP } from "@/lib/firebase";
+import { apiRequest } from "@/lib/queryClient";
 import type { ConfirmationResult } from "firebase/auth";
 
 export default function PhoneAuth() {
@@ -76,11 +77,30 @@ export default function PhoneAuth() {
     try {
       const user = await verifyOTP(confirmationResult, otp);
       console.log("User signed in with phone:", user);
+      
+      // Update user role in backend
+      const selectedRole = localStorage.getItem('selectedRole') || 'customer';
+      try {
+        await apiRequest('POST', '/api/auth/select-role', { role: selectedRole });
+        console.log('User role updated in backend');
+      } catch (error) {
+        console.error('Failed to update user role in backend:', error);
+        // Continue anyway, the role is stored in localStorage
+      }
+      
       toast({
         title: "Welcome!",
         description: "Successfully signed in with phone number",
       });
-      setLocation('/');
+      
+      // Redirect based on selected role
+      if (selectedRole === 'customer') {
+        setLocation('/customer');
+      } else if (selectedRole === 'freelancer') {
+        setLocation('/freelancer');
+      } else {
+        setLocation('/');
+      }
     } catch (error: any) {
       console.error("Error verifying OTP:", error);
       toast({
@@ -117,16 +137,6 @@ export default function PhoneAuth() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Status Bar */}
-      <div className="status-bar">
-        <span>9:41 AM</span>
-        <div className="flex space-x-1">
-          <i className="fas fa-signal"></i>
-          <i className="fas fa-wifi"></i>
-          <i className="fas fa-battery-three-quarters"></i>
-        </div>
-      </div>
-
       {/* Header */}
       <div className="bg-gradient-purple text-white p-4">
         <div className="flex items-center space-x-3">
@@ -139,28 +149,28 @@ export default function PhoneAuth() {
           >
             <i className="fas fa-arrow-left text-lg"></i>
           </Button>
-          <h1 className="text-lg font-semibold">
+          <h1 className="text-xl font-bold">
             {step === "phone" ? "Enter Phone Number" : "Verify Code"}
           </h1>
         </div>
       </div>
 
       <div className="p-6">
-        <Card className="bg-white rounded-2xl shadow-lg border border-gray-100">
-          <CardContent className="p-6">
+        <Card className="bg-gray-900 rounded-2xl shadow-lg border border-gray-700">
+          <CardContent className="p-8">
             {step === "phone" ? (
-              <div className="space-y-6">
+              <div className="space-y-8">
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i className="fas fa-mobile-alt text-blue-600 text-2xl"></i>
+                  <div className="w-20 h-20 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i className="fas fa-mobile-alt text-blue-400 text-3xl"></i>
                   </div>
-                  <h2 className="text-xl font-semibold text-gray-800 mb-2">Enter Phone Number</h2>
-                  <p className="text-gray-600 text-sm">We'll send you a verification code</p>
+                  <h2 className="text-2xl font-bold text-white mb-3">Enter Phone Number</h2>
+                  <p className="text-gray-300 text-base">We'll send you a verification code</p>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-base font-semibold text-gray-200 mb-3">
                       Phone Number
                     </label>
                     <Input
@@ -168,7 +178,7 @@ export default function PhoneAuth() {
                       placeholder="+91 98765 43210"
                       value={phoneNumber}
                       onChange={(e) => setPhoneNumber(formatPhoneNumber(e.target.value))}
-                      className="w-full text-lg"
+                      className="w-full text-xl bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-400 focus:ring-blue-400"
                       data-testid="input-phone-number"
                     />
                   </div>
@@ -191,21 +201,21 @@ export default function PhoneAuth() {
                 </div>
               </div>
             ) : (
-              <div className="space-y-6">
+              <div className="space-y-8">
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i className="fas fa-shield-alt text-green-600 text-2xl"></i>
+                  <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i className="fas fa-shield-alt text-green-400 text-3xl"></i>
                   </div>
-                  <h2 className="text-xl font-semibold text-gray-800 mb-2">Enter Verification Code</h2>
-                  <p className="text-gray-600 text-sm">
+                  <h2 className="text-2xl font-bold text-white mb-3">Enter Verification Code</h2>
+                  <p className="text-gray-300 text-base">
                     We sent a 6-digit code to<br />
-                    <span className="font-medium">{phoneNumber}</span>
+                    <span className="font-semibold text-white">{phoneNumber}</span>
                   </p>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-base font-semibold text-gray-200 mb-3">
                       Verification Code
                     </label>
                     <Input
@@ -213,7 +223,7 @@ export default function PhoneAuth() {
                       placeholder="123456"
                       value={otp}
                       onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                      className="w-full text-lg text-center tracking-widest"
+                      className="w-full text-xl text-center tracking-widest bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-green-400 focus:ring-green-400"
                       maxLength={6}
                       data-testid="input-otp"
                     />
@@ -251,7 +261,7 @@ export default function PhoneAuth() {
 
         {step === "phone" && (
           <div className="mt-6 text-center">
-            <p className="text-xs text-gray-500">
+            <p className="text-sm text-gray-400">
               By continuing, you agree to our Terms of Service and Privacy Policy
             </p>
           </div>

@@ -1,15 +1,18 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import Navigation from "@/components/navigation";
+import { signOutUser } from "@/lib/firebase";
 
 export default function AdminDashboard() {
   const { user: firebaseUser, isAuthenticated, isLoading } = useFirebaseAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   // Redirect to landing if not authenticated
   useEffect(() => {
@@ -18,6 +21,29 @@ export default function AdminDashboard() {
       return;
     }
   }, [isAuthenticated, isLoading, setLocation]);
+
+  // Role verification is now handled by ProtectedRoute in App.tsx
+
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      await signOutUser();
+      toast({
+        title: "Logged out successfully",
+        description: "You have been logged out of your admin account.",
+      });
+      setLocation('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast({
+        title: "Logout failed",
+        description: "There was an error logging out. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -42,54 +68,88 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen">
-      {/* Status Bar */}
-      <div className="status-bar">
-        <span>9:41 AM</span>
-        <div className="flex space-x-1">
-          <i className="fas fa-signal"></i>
-          <i className="fas fa-wifi"></i>
-          <i className="fas fa-battery-three-quarters"></i>
-        </div>
-      </div>
-
       {/* Header */}
       <div className="bg-gradient-purple text-white p-6 pb-8">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <i className="fas fa-crown text-2xl"></i>
+        <div className="flex justify-between items-start mb-4">
+          <div className="flex-1"></div>
+          <div className="text-center flex-1">
+            <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i className="fas fa-crown text-2xl"></i>
+            </div>
+            <h1 className="text-2xl font-bold mb-2">Admin Dashboard</h1>
+            <p className="text-purple-100 text-sm">
+              Welcome, {firebaseUser?.displayName || firebaseUser?.email || 'Admin'}!
+            </p>
           </div>
-          <h1 className="text-2xl font-bold mb-2">Admin Dashboard</h1>
-          <p className="text-purple-100 text-sm">
-            Welcome, {firebaseUser?.displayName || firebaseUser?.email || 'Admin'}!
-          </p>
+          <div className="flex-1 flex justify-end">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="bg-white bg-opacity-10 border-white border-opacity-20 text-white hover:bg-white hover:bg-opacity-20"
+                  disabled={isLoggingOut}
+                >
+                  {isLoggingOut ? (
+                    <>
+                      <i className="fas fa-spinner fa-spin mr-2"></i>
+                      Logging out...
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-sign-out-alt mr-2"></i>
+                      Logout
+                    </>
+                  )}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to logout from your admin account? You will need to sign in again to access the admin dashboard.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={handleLogout}
+                    className="bg-red-600 hover:bg-red-700"
+                  >
+                    Logout
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         </div>
       </div>
 
       {/* Stats Cards */}
       <div className="p-6 -mt-4">
         <div className="grid grid-cols-2 gap-4 mb-6">
-          <Card className="bg-white rounded-2xl shadow-lg border border-gray-100">
+          <Card className="bg-card rounded-2xl shadow-lg border border-gray-100">
             <CardContent className="p-4 text-center">
               <div className="text-2xl font-bold text-blue-600 mb-1">{stats.totalUsers}</div>
               <div className="text-sm text-gray-600">Total Users</div>
             </CardContent>
           </Card>
           
-          <Card className="bg-white rounded-2xl shadow-lg border border-gray-100">
+          <Card className="bg-card rounded-2xl shadow-lg border border-gray-100">
             <CardContent className="p-4 text-center">
               <div className="text-2xl font-bold text-green-600 mb-1">{stats.totalFreelancers}</div>
               <div className="text-sm text-gray-600">Freelancers</div>
             </CardContent>
           </Card>
           
-          <Card className="bg-white rounded-2xl shadow-lg border border-gray-100">
+          <Card className="bg-card rounded-2xl shadow-lg border border-gray-100">
             <CardContent className="p-4 text-center">
               <div className="text-2xl font-bold text-orange-600 mb-1">{stats.totalLeads}</div>
               <div className="text-sm text-gray-600">Active Leads</div>
             </CardContent>
           </Card>
           
-          <Card className="bg-white rounded-2xl shadow-lg border border-gray-100">
+          <Card className="bg-card rounded-2xl shadow-lg border border-gray-100">
             <CardContent className="p-4 text-center">
               <div className="text-2xl font-bold text-red-600 mb-1">{stats.pendingVerifications}</div>
               <div className="text-sm text-gray-600">Pending Verifications</div>
@@ -167,7 +227,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Payment Status Visual */}
-          <Card className="bg-white rounded-2xl shadow-lg border border-gray-100 mt-4">
+          <Card className="bg-card rounded-2xl shadow-lg border border-gray-100 mt-4">
             <CardContent className="p-6">
               <h3 className="font-semibold text-gray-800 mb-4 flex items-center">
                 <i className="fas fa-pie-chart text-purple-600 mr-2"></i>
@@ -213,7 +273,7 @@ export default function AdminDashboard() {
         <div className="space-y-3 mb-6">
           <h2 className="text-lg font-semibold text-on-surface">Quick Actions</h2>
           
-          <Card className="bg-white rounded-2xl shadow-lg border border-gray-100">
+          <Card className="bg-card rounded-2xl shadow-lg border border-gray-100">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
@@ -233,7 +293,7 @@ export default function AdminDashboard() {
           </Card>
 
           {/* Payment Analytics Quick Action */}
-          <Card className="bg-white rounded-2xl shadow-lg border border-gray-100">
+          <Card className="bg-card rounded-2xl shadow-lg border border-gray-100">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
@@ -252,7 +312,7 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white rounded-2xl shadow-lg border border-gray-100">
+          <Card className="bg-card rounded-2xl shadow-lg border border-gray-100">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
@@ -271,7 +331,7 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white rounded-2xl shadow-lg border border-gray-100">
+          <Card className="bg-card rounded-2xl shadow-lg border border-gray-100">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
@@ -292,7 +352,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <Navigation />
+      <Navigation currentPage="dashboard" userRole="admin" />
     </div>
   );
 }

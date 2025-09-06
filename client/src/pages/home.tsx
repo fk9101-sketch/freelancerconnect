@@ -7,27 +7,36 @@ export default function Home() {
   const [, setLocation] = useLocation();
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      setLocation('/');
-      return;
-    }
+    if (!isLoading) {
+      if (!isAuthenticated) {
+        setLocation('/');
+        return;
+      }
 
-    if (isAuthenticated && firebaseUser) {
-      // Get the selected role from localStorage
-      const selectedRole = localStorage.getItem('selectedRole') || 'customer';
-      
-      // Redirect to appropriate dashboard based on selected role
-      switch (selectedRole) {
-        case 'freelancer':
-          setLocation('/freelancer');
-          break;
-        case 'admin':
-          setLocation('/admin');
-          break;
-        case 'customer':
-        default:
+      if (isAuthenticated && firebaseUser) {
+        // Get the selected role from localStorage
+        const selectedRole = localStorage.getItem('selectedRole');
+        
+        // If no role is set, default to customer
+        if (!selectedRole) {
+          localStorage.setItem('selectedRole', 'customer');
           setLocation('/customer');
-          break;
+          return;
+        }
+        
+        // Redirect to appropriate dashboard based on selected role
+        switch (selectedRole) {
+          case 'freelancer':
+            setLocation('/freelancer');
+            break;
+          case 'admin':
+            setLocation('/admin');
+            break;
+          case 'customer':
+          default:
+            setLocation('/customer');
+            break;
+        }
       }
     }
   }, [isAuthenticated, firebaseUser, isLoading, setLocation]);

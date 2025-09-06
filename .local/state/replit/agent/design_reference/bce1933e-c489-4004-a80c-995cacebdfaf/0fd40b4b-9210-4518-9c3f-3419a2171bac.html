@@ -1,0 +1,879 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Freelancer Connect - Local Service Hiring App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#6B46C1',
+                        'primary-light': '#A78BFA',
+                        'primary-lighter': '#C4B5FD',
+                        'surface': '#FAFAFA',
+                        'on-surface': '#1F2937',
+                        'success': '#10B981',
+                        'warning': '#F59E0B',
+                        'error': '#EF4444',
+                    },
+                    backgroundImage: {
+                        'gradient-purple': 'linear-gradient(135deg, #6B46C1 0%, #A78BFA 100%)',
+                        'gradient-purple-light': 'linear-gradient(135deg, #A78BFA 0%, #C4B5FD 100%)',
+                    }
+                }
+            }
+        };
+    </script>
+</head>
+<body class="bg-surface font-sans">
+    <!-- Mobile Container -->
+    <div class="max-w-md mx-auto bg-white shadow-2xl min-h-screen relative">
+        
+        <!-- @COMPONENT: RoleSelectionScreen -->
+        <div id="roleSelection" class="screen active">
+            <!-- Status Bar -->
+            <div class="bg-gradient-purple text-white px-4 py-2 flex justify-between items-center text-sm">
+                <span>9:41 AM</span>
+                <div class="flex space-x-1">
+                    <i class="fas fa-signal"></i>
+                    <i class="fas fa-wifi"></i>
+                    <i class="fas fa-battery-three-quarters"></i>
+                </div>
+            </div>
+
+            <!-- Hero Section -->
+            <div class="bg-gradient-purple text-white p-6 pb-8">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-handshake text-2xl"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold mb-2">Freelancer Connect</h1>
+                    <p class="text-purple-100 text-sm">Connect with local service providers</p>
+                </div>
+            </div>
+
+            <!-- Role Selection Cards -->
+            <div class="p-6 -mt-4">
+                <div class="space-y-4">
+                    <!-- @FUNCTIONALITY: Role selection should set user type and navigate to appropriate dashboard -->
+                    <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 cursor-pointer hover:shadow-xl transition-shadow" data-event="click:selectRole" data-role="customer">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-user text-blue-600 text-xl"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-semibold text-on-surface">I'm a Customer</h3>
+                                <p class="text-gray-600 text-sm">Find local service providers</p>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 cursor-pointer hover:shadow-xl transition-shadow" data-event="click:selectRole" data-role="freelancer">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-hammer text-green-600 text-xl"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-semibold text-on-surface">I'm a Freelancer</h3>
+                                <p class="text-gray-600 text-sm">Offer your services locally</p>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 cursor-pointer hover:shadow-xl transition-shadow" data-event="click:selectRole" data-role="admin">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-cog text-primary text-xl"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-semibold text-on-surface">Admin Portal</h3>
+                                <p class="text-gray-600 text-sm">Manage platform operations</p>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Login Options -->
+                <div class="mt-8 space-y-3">
+                    <button class="w-full bg-gradient-purple text-white py-3 rounded-xl font-medium hover:opacity-90 transition-opacity">
+                        <i class="fab fa-google mr-2"></i>
+                        Continue with Google
+                    </button>
+                    <button class="w-full border border-gray-300 text-on-surface py-3 rounded-xl font-medium hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-phone mr-2"></i>
+                        Continue with Phone
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: RoleSelectionScreen -->
+
+        <!-- @COMPONENT: CustomerDashboard -->
+        <div id="customerDashboard" class="screen hidden">
+            <!-- Header -->
+            <div class="bg-gradient-purple text-white p-4">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h2 class="text-lg font-semibold">Hello, <span data-bind="user.name">John</span>!</h2>
+                        <p class="text-purple-100 text-sm">What service do you need?</p>
+                    </div>
+                    <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-bell text-lg"></i>
+                    </div>
+                </div>
+
+                <!-- Search Bar -->
+                <div class="relative">
+                    <input type="text" placeholder="Search for services..." class="w-full bg-white bg-opacity-90 text-gray-800 px-4 py-3 pl-10 rounded-xl placeholder-gray-500">
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+                </div>
+            </div>
+
+            <!-- Categories Grid -->
+            <div class="p-4">
+                <h3 class="font-semibold text-on-surface mb-4">Popular Services</h3>
+                <!-- @MAP: categories.map(category => ( -->
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center cursor-pointer hover:shadow-md transition-shadow" data-event="click:selectCategory" data-category="electrician">
+                        <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mx-auto mb-2">
+                            <i class="fas fa-bolt text-yellow-600 text-xl"></i>
+                        </div>
+                        <p class="text-xs font-medium text-gray-700">Electrician</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center cursor-pointer hover:shadow-md transition-shadow">
+                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-2">
+                            <i class="fas fa-wrench text-blue-600 text-xl"></i>
+                        </div>
+                        <p class="text-xs font-medium text-gray-700">Plumber</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center cursor-pointer hover:shadow-md transition-shadow">
+                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-2">
+                            <i class="fas fa-hammer text-green-600 text-xl"></i>
+                        </div>
+                        <p class="text-xs font-medium text-gray-700">Carpenter</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center cursor-pointer hover:shadow-md transition-shadow">
+                        <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-2">
+                            <i class="fas fa-paint-brush text-primary text-xl"></i>
+                        </div>
+                        <p class="text-xs font-medium text-gray-700">Painter</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center cursor-pointer hover:shadow-md transition-shadow">
+                        <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mx-auto mb-2">
+                            <i class="fas fa-car text-red-600 text-xl"></i>
+                        </div>
+                        <p class="text-xs font-medium text-gray-700">Mechanic</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center cursor-pointer hover:shadow-md transition-shadow">
+                        <div class="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-2">
+                            <i class="fas fa-ellipsis-h text-gray-600 text-xl"></i>
+                        </div>
+                        <p class="text-xs font-medium text-gray-700">More</p>
+                    </div>
+                </div>
+                <!-- @END_MAP )) -->
+
+                <!-- Recent Activity -->
+                <div class="mt-6">
+                    <h3 class="font-semibold text-on-surface mb-4">Your Recent Requests</h3>
+                    <div class="space-y-3">
+                        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-medium text-sm">Electrical Repair</span>
+                                <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Completed</span>
+                            </div>
+                            <p class="text-gray-600 text-xs mb-2">Fixed ceiling fan and switches</p>
+                            <div class="flex items-center justify-between text-xs text-gray-500">
+                                <span>2 days ago</span>
+                                <span>₹450</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Floating Action Button -->
+            <div class="fixed bottom-20 right-6">
+                <button class="w-14 h-14 bg-gradient-purple text-white rounded-full shadow-lg flex items-center justify-center" data-event="click:showPostJobForm">
+                    <i class="fas fa-plus text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Bottom Navigation -->
+            <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+                <div class="max-w-md mx-auto">
+                    <div class="flex items-center justify-around py-2">
+                        <button class="flex flex-col items-center py-2 px-3 text-primary">
+                            <i class="fas fa-home text-lg mb-1"></i>
+                            <span class="text-xs">Home</span>
+                        </button>
+                        <button class="flex flex-col items-center py-2 px-3 text-gray-500">
+                            <i class="fas fa-search text-lg mb-1"></i>
+                            <span class="text-xs">Search</span>
+                        </button>
+                        <button class="flex flex-col items-center py-2 px-3 text-gray-500">
+                            <i class="fas fa-list text-lg mb-1"></i>
+                            <span class="text-xs">Requests</span>
+                        </button>
+                        <button class="flex flex-col items-center py-2 px-3 text-gray-500">
+                            <i class="fas fa-user text-lg mb-1"></i>
+                            <span class="text-xs">Profile</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: CustomerDashboard -->
+
+        <!-- @COMPONENT: FreelancerDashboard -->
+        <div id="freelancerDashboard" class="screen hidden">
+            <!-- Header -->
+            <div class="bg-gradient-purple text-white p-4">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h2 class="text-lg font-semibold">Welcome, <span data-bind="freelancer.name">Alex</span>!</h2>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-purple-100 text-sm">Electrician</span>
+                            <div class="flex items-center space-x-1">
+                                <span class="bg-green-500 w-2 h-2 rounded-full"></span>
+                                <span class="text-xs text-purple-100">Online</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="bg-white bg-opacity-20 rounded-lg px-2 py-1">
+                            <span class="text-xs font-medium">VERIFIED</span>
+                        </div>
+                        <i class="fas fa-bell text-lg"></i>
+                    </div>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="bg-white bg-opacity-20 rounded-xl p-3 text-center">
+                        <p class="text-2xl font-bold">12</p>
+                        <p class="text-xs text-purple-100">New Leads</p>
+                    </div>
+                    <div class="bg-white bg-opacity-20 rounded-xl p-3 text-center">
+                        <p class="text-2xl font-bold">₹8.5K</p>
+                        <p class="text-xs text-purple-100">This Month</p>
+                    </div>
+                    <div class="bg-white bg-opacity-20 rounded-xl p-3 text-center">
+                        <p class="text-2xl font-bold">4.8</p>
+                        <p class="text-xs text-purple-100">Rating</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subscription Status -->
+            <div class="p-4">
+                <div class="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl p-4 mb-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="font-semibold">Lead Plan Active</h3>
+                            <p class="text-sm text-green-100">Expires on Mar 15, 2024</p>
+                        </div>
+                        <i class="fas fa-crown text-xl"></i>
+                    </div>
+                </div>
+
+                <!-- New Leads -->
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-semibold text-on-surface">New Leads</h3>
+                        <button class="text-primary text-sm font-medium">View All</button>
+                    </div>
+
+                    <!-- @MAP: leads.map(lead => ( -->
+                    <div class="space-y-3">
+                        <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-l-primary">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex-1">
+                                    <h4 class="font-medium text-on-surface mb-1">Electrical Repair Needed</h4>
+                                    <p class="text-gray-600 text-sm mb-2">Ceiling fan not working, need urgent repair</p>
+                                    <div class="flex items-center space-x-4 text-xs text-gray-500">
+                                        <span><i class="fas fa-map-marker-alt mr-1"></i>Sector 21, Noida</span>
+                                        <span><i class="fas fa-clock mr-1"></i>2 min ago</span>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-primary font-semibold text-sm">₹300-500</p>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="flex-1 bg-gradient-purple text-white py-2 rounded-lg text-sm font-medium" data-event="click:acceptLead">
+                                    Accept Lead
+                                </button>
+                                <button class="px-4 border border-gray-300 text-gray-600 py-2 rounded-lg text-sm">
+                                    Details
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-l-orange-400">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex-1">
+                                    <h4 class="font-medium text-on-surface mb-1">Switch Board Installation</h4>
+                                    <p class="text-gray-600 text-sm mb-2">Need to install new switch board in kitchen</p>
+                                    <div class="flex items-center space-x-4 text-xs text-gray-500">
+                                        <span><i class="fas fa-map-marker-alt mr-1"></i>Greater Noida</span>
+                                        <span><i class="fas fa-clock mr-1"></i>15 min ago</span>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-primary font-semibold text-sm">₹800-1200</p>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="flex-1 bg-gradient-purple text-white py-2 rounded-lg text-sm font-medium">
+                                    Accept Lead
+                                </button>
+                                <button class="px-4 border border-gray-300 text-gray-600 py-2 rounded-lg text-sm">
+                                    Details
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- @END_MAP )) -->
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="grid grid-cols-2 gap-3">
+                    <button class="bg-white border border-gray-200 rounded-xl p-4 text-center hover:shadow-md transition-shadow">
+                        <i class="fas fa-chart-line text-primary text-xl mb-2"></i>
+                        <p class="text-sm font-medium text-gray-700">Analytics</p>
+                    </button>
+                    <button class="bg-white border border-gray-200 rounded-xl p-4 text-center hover:shadow-md transition-shadow">
+                        <i class="fas fa-download text-primary text-xl mb-2"></i>
+                        <p class="text-sm font-medium text-gray-700">Export Data</p>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bottom Navigation -->
+            <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+                <div class="max-w-md mx-auto">
+                    <div class="flex items-center justify-around py-2">
+                        <button class="flex flex-col items-center py-2 px-3 text-primary">
+                            <i class="fas fa-home text-lg mb-1"></i>
+                            <span class="text-xs">Dashboard</span>
+                        </button>
+                        <button class="flex flex-col items-center py-2 px-3 text-gray-500">
+                            <i class="fas fa-list-alt text-lg mb-1"></i>
+                            <span class="text-xs">Leads</span>
+                        </button>
+                        <button class="flex flex-col items-center py-2 px-3 text-gray-500">
+                            <i class="fas fa-credit-card text-lg mb-1"></i>
+                            <span class="text-xs">Plans</span>
+                        </button>
+                        <button class="flex flex-col items-center py-2 px-3 text-gray-500">
+                            <i class="fas fa-user text-lg mb-1"></i>
+                            <span class="text-xs">Profile</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: FreelancerDashboard -->
+
+        <!-- @COMPONENT: AdminDashboard -->
+        <div id="adminDashboard" class="screen hidden">
+            <!-- Header -->
+            <div class="bg-gradient-purple text-white p-4">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h2 class="text-lg font-semibold">Admin Dashboard</h2>
+                        <p class="text-purple-100 text-sm">Platform Management</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                            <i class="fas fa-bell text-sm"></i>
+                        </div>
+                        <div class="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-sm"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="grid grid-cols-4 gap-2">
+                    <div class="bg-white bg-opacity-20 rounded-lg p-2 text-center">
+                        <p class="text-lg font-bold">1.2K</p>
+                        <p class="text-xs text-purple-100">Users</p>
+                    </div>
+                    <div class="bg-white bg-opacity-20 rounded-lg p-2 text-center">
+                        <p class="text-lg font-bold">342</p>
+                        <p class="text-xs text-purple-100">Freelancers</p>
+                    </div>
+                    <div class="bg-white bg-opacity-20 rounded-lg p-2 text-center">
+                        <p class="text-lg font-bold">89</p>
+                        <p class="text-xs text-purple-100">Active Leads</p>
+                    </div>
+                    <div class="bg-white bg-opacity-20 rounded-lg p-2 text-center">
+                        <p class="text-lg font-bold">₹45K</p>
+                        <p class="text-xs text-purple-100">Revenue</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Management Sections -->
+            <div class="p-4 pb-20">
+                <!-- Pending Verifications -->
+                <div class="mb-6">
+                    <h3 class="font-semibold text-on-surface mb-3">Pending Verifications</h3>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div class="p-4 border-b border-gray-100">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-user text-gray-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-sm">Rajesh Kumar</p>
+                                        <p class="text-xs text-gray-500">Electrician • Applied 2 days ago</p>
+                                    </div>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button class="bg-green-500 text-white px-3 py-1 rounded-lg text-xs font-medium">Approve</button>
+                                    <button class="bg-red-500 text-white px-3 py-1 rounded-lg text-xs font-medium">Reject</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-user text-gray-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-sm">Priya Singh</p>
+                                        <p class="text-xs text-gray-500">Painter • Applied 1 day ago</p>
+                                    </div>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button class="bg-green-500 text-white px-3 py-1 rounded-lg text-xs font-medium">Approve</button>
+                                    <button class="bg-red-500 text-white px-3 py-1 rounded-lg text-xs font-medium">Reject</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions Grid -->
+                <div class="grid grid-cols-2 gap-3 mb-6">
+                    <button class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center hover:shadow-md transition-shadow">
+                        <i class="fas fa-users text-primary text-2xl mb-2"></i>
+                        <p class="font-medium text-sm text-gray-700">Manage Users</p>
+                        <p class="text-xs text-gray-500">1,234 total</p>
+                    </button>
+                    <button class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center hover:shadow-md transition-shadow">
+                        <i class="fas fa-tasks text-primary text-2xl mb-2"></i>
+                        <p class="font-medium text-sm text-gray-700">Lead Assignment</p>
+                        <p class="text-xs text-gray-500">89 pending</p>
+                    </button>
+                    <button class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center hover:shadow-md transition-shadow">
+                        <i class="fas fa-crown text-primary text-2xl mb-2"></i>
+                        <p class="font-medium text-sm text-gray-700">Subscriptions</p>
+                        <p class="text-xs text-gray-500">View plans</p>
+                    </button>
+                    <button class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center hover:shadow-md transition-shadow">
+                        <i class="fas fa-chart-bar text-primary text-2xl mb-2"></i>
+                        <p class="font-medium text-sm text-gray-700">Analytics</p>
+                        <p class="text-xs text-gray-500">View reports</p>
+                    </button>
+                </div>
+
+                <!-- Recent Activity -->
+                <div>
+                    <h3 class="font-semibold text-on-surface mb-3">Recent Activity</h3>
+                    <div class="space-y-3">
+                        <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-check text-green-600 text-xs"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium">New freelancer approved</p>
+                                    <p class="text-xs text-gray-500">Alex Kumar - Electrician</p>
+                                </div>
+                                <span class="text-xs text-gray-400">2 min ago</span>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-dollar-sign text-blue-600 text-xs"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium">Payment received</p>
+                                    <p class="text-xs text-gray-500">Lead Plan subscription - ₹299</p>
+                                </div>
+                                <span class="text-xs text-gray-400">5 min ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Navigation -->
+            <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+                <div class="max-w-md mx-auto">
+                    <div class="flex items-center justify-around py-2">
+                        <button class="flex flex-col items-center py-2 px-3 text-primary">
+                            <i class="fas fa-tachometer-alt text-lg mb-1"></i>
+                            <span class="text-xs">Dashboard</span>
+                        </button>
+                        <button class="flex flex-col items-center py-2 px-3 text-gray-500">
+                            <i class="fas fa-users text-lg mb-1"></i>
+                            <span class="text-xs">Users</span>
+                        </button>
+                        <button class="flex flex-col items-center py-2 px-3 text-gray-500">
+                            <i class="fas fa-tasks text-lg mb-1"></i>
+                            <span class="text-xs">Leads</span>
+                        </button>
+                        <button class="flex flex-col items-center py-2 px-3 text-gray-500">
+                            <i class="fas fa-cog text-lg mb-1"></i>
+                            <span class="text-xs">Settings</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: AdminDashboard -->
+
+        <!-- @COMPONENT: JobPostingForm -->
+        <div id="jobPostingForm" class="screen hidden">
+            <!-- Header -->
+            <div class="bg-gradient-purple text-white p-4 flex items-center">
+                <button class="mr-4" data-event="click:goBack">
+                    <i class="fas fa-arrow-left text-lg"></i>
+                </button>
+                <h2 class="text-lg font-semibold">Post a Job</h2>
+            </div>
+
+            <!-- Form Content -->
+            <div class="p-4 pb-20">
+                <form class="space-y-6">
+                    <!-- Category Selection -->
+                    <div>
+                        <label class="block text-sm font-medium text-on-surface mb-2">Service Category</label>
+                        <select class="w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-700 focus:border-primary focus:ring-primary">
+                            <option>Select a category</option>
+                            <option>Electrician</option>
+                            <option>Plumber</option>
+                            <option>Carpenter</option>
+                            <option>Painter</option>
+                            <option>Mechanic</option>
+                        </select>
+                    </div>
+
+                    <!-- Job Title -->
+                    <div>
+                        <label class="block text-sm font-medium text-on-surface mb-2">Job Title</label>
+                        <input type="text" placeholder="e.g., Fix ceiling fan" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-700 focus:border-primary focus:ring-primary">
+                    </div>
+
+                    <!-- Description -->
+                    <div>
+                        <label class="block text-sm font-medium text-on-surface mb-2">Description</label>
+                        <textarea rows="4" placeholder="Describe your requirements in detail..." class="w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-700 focus:border-primary focus:ring-primary"></textarea>
+                    </div>
+
+                    <!-- Budget Range -->
+                    <div>
+                        <label class="block text-sm font-medium text-on-surface mb-2">Budget Range</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <input type="number" placeholder="Min amount" class="border border-gray-300 rounded-xl px-4 py-3 text-gray-700 focus:border-primary focus:ring-primary">
+                            <input type="number" placeholder="Max amount" class="border border-gray-300 rounded-xl px-4 py-3 text-gray-700 focus:border-primary focus:ring-primary">
+                        </div>
+                    </div>
+
+                    <!-- Location -->
+                    <div>
+                        <label class="block text-sm font-medium text-on-surface mb-2">Location</label>
+                        <div class="relative">
+                            <input type="text" placeholder="Enter your area or pincode" class="w-full border border-gray-300 rounded-xl px-4 py-3 pl-10 text-gray-700 focus:border-primary focus:ring-primary">
+                            <i class="fas fa-map-marker-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+                        </div>
+                        <button type="button" class="mt-2 text-primary text-sm font-medium flex items-center">
+                            <i class="fas fa-crosshairs mr-1"></i>
+                            Use current location
+                        </button>
+                    </div>
+
+                    <!-- Photo Upload -->
+                    <div>
+                        <label class="block text-sm font-medium text-on-surface mb-2">Photos (Optional)</label>
+                        <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center">
+                            <i class="fas fa-camera text-gray-400 text-2xl mb-2"></i>
+                            <p class="text-gray-500 text-sm">Tap to add photos</p>
+                        </div>
+                    </div>
+
+                    <!-- Preferred Time -->
+                    <div>
+                        <label class="block text-sm font-medium text-on-surface mb-2">Preferred Time</label>
+                        <select class="w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-700 focus:border-primary focus:ring-primary">
+                            <option>Select preferred time</option>
+                            <option>ASAP</option>
+                            <option>Within 2 hours</option>
+                            <option>Today</option>
+                            <option>Tomorrow</option>
+                            <option>This week</option>
+                        </select>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="w-full bg-gradient-purple text-white py-3 rounded-xl font-medium text-lg">
+                        Post Job Request
+                    </button>
+                </form>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: JobPostingForm -->
+
+        <!-- @COMPONENT: SubscriptionPlans -->
+        <div id="subscriptionPlans" class="screen hidden">
+            <!-- Header -->
+            <div class="bg-gradient-purple text-white p-4 flex items-center">
+                <button class="mr-4" data-event="click:goBack">
+                    <i class="fas fa-arrow-left text-lg"></i>
+                </button>
+                <h2 class="text-lg font-semibold">Subscription Plans</h2>
+            </div>
+
+            <!-- Plans Content -->
+            <div class="p-4 pb-20">
+                <!-- Lead Plan -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 mb-4 border border-gray-100">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-xl font-bold text-on-surface">Lead Plan</h3>
+                            <p class="text-gray-600 text-sm">Accept unlimited leads</p>
+                        </div>
+                        <i class="fas fa-bolt text-primary text-2xl"></i>
+                    </div>
+                    
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-check text-green-500"></i>
+                            <span class="text-sm text-gray-700">Accept leads instantly</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-check text-green-500"></i>
+                            <span class="text-sm text-gray-700">Get customer contact details</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-check text-green-500"></i>
+                            <span class="text-sm text-gray-700">Real-time notifications</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2 mb-4">
+                        <div class="text-center p-3 border border-gray-200 rounded-xl">
+                            <p class="font-bold text-primary">₹299</p>
+                            <p class="text-xs text-gray-500">Monthly</p>
+                        </div>
+                        <div class="text-center p-3 border-2 border-primary rounded-xl bg-primary bg-opacity-10">
+                            <p class="font-bold text-primary">₹599</p>
+                            <p class="text-xs text-gray-500">Quarterly</p>
+                        </div>
+                        <div class="text-center p-3 border border-gray-200 rounded-xl">
+                            <p class="font-bold text-primary">₹999</p>
+                            <p class="text-xs text-gray-500">Yearly</p>
+                        </div>
+                    </div>
+
+                    <button class="w-full bg-gradient-purple text-white py-3 rounded-xl font-medium">
+                        Subscribe Now
+                    </button>
+                </div>
+
+                <!-- Position Plan -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 mb-4 border border-gray-100">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-xl font-bold text-on-surface">Position Plan</h3>
+                            <p class="text-gray-600 text-sm">Top ranking in search results</p>
+                        </div>
+                        <i class="fas fa-crown text-warning text-2xl"></i>
+                    </div>
+                    
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-check text-green-500"></i>
+                            <span class="text-sm text-gray-700">Top 3 position guarantee</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-check text-green-500"></i>
+                            <span class="text-sm text-gray-700">Category & area specific</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-check text-green-500"></i>
+                            <span class="text-sm text-gray-700">Priority lead notifications</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 mb-4">
+                        <div class="flex justify-between items-center p-3 border border-gray-200 rounded-xl">
+                            <span class="text-sm font-medium">#1 Position</span>
+                            <span class="font-bold text-primary">₹1,999</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 border border-gray-200 rounded-xl">
+                            <span class="text-sm font-medium">#2 Position</span>
+                            <span class="font-bold text-primary">₹999</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 border border-gray-200 rounded-xl">
+                            <span class="text-sm font-medium">#3 Position</span>
+                            <span class="font-bold text-primary">₹699</span>
+                        </div>
+                    </div>
+
+                    <button class="w-full bg-gradient-purple text-white py-3 rounded-xl font-medium">
+                        Choose Position
+                    </button>
+                </div>
+
+                <!-- Badge Plan -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-xl font-bold text-on-surface">Badge Plan</h3>
+                            <p class="text-gray-600 text-sm">Build trust with verification</p>
+                        </div>
+                        <i class="fas fa-shield-alt text-success text-2xl"></i>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="text-center p-4 border border-gray-200 rounded-xl">
+                            <i class="fas fa-check-circle text-blue-500 text-2xl mb-2"></i>
+                            <h4 class="font-semibold text-sm">Verified</h4>
+                            <p class="text-primary font-bold mt-2">₹299</p>
+                        </div>
+                        <div class="text-center p-4 border border-gray-200 rounded-xl">
+                            <i class="fas fa-star text-warning text-2xl mb-2"></i>
+                            <h4 class="font-semibold text-sm">Trusted</h4>
+                            <p class="text-primary font-bold mt-2">₹999</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: SubscriptionPlans -->
+
+    </div>
+
+    <!-- View Controller Scripts -->
+    <script>
+        // TODO: Implement business logic, API calls, and state management
+        (function() {
+            'use strict';
+            
+            // Simple view management for demo
+            const screens = document.querySelectorAll('.screen');
+            const showScreen = (screenId) => {
+                screens.forEach(screen => {
+                    screen.classList.add('hidden');
+                    screen.classList.remove('active');
+                });
+                const targetScreen = document.getElementById(screenId);
+                if (targetScreen) {
+                    targetScreen.classList.remove('hidden');
+                    targetScreen.classList.add('active');
+                }
+            };
+
+            // Role selection handlers
+            document.addEventListener('click', (e) => {
+                const roleButton = e.target.closest('[data-role]');
+                if (roleButton) {
+                    const role = roleButton.dataset.role;
+                    switch (role) {
+                        case 'customer':
+                            showScreen('customerDashboard');
+                            break;
+                        case 'freelancer':
+                            showScreen('freelancerDashboard');
+                            break;
+                        case 'admin':
+                            showScreen('adminDashboard');
+                            break;
+                    }
+                }
+
+                // FAB button handler
+                if (e.target.closest('[data-event="click:showPostJobForm"]')) {
+                    showScreen('jobPostingForm');
+                }
+
+                // Back button handlers
+                if (e.target.closest('[data-event="click:goBack"]')) {
+                    showScreen('customerDashboard'); // or previous screen
+                }
+
+                // Navigation handlers
+                const navButton = e.target.closest('[data-event]');
+                if (navButton && navButton.dataset.event.includes('Plans')) {
+                    showScreen('subscriptionPlans');
+                }
+            });
+
+            // Notification sound simulation
+            const playNotificationSound = () => {
+                // TODO: Implement notification sound using Web Audio API
+                console.log('🔔 New lead notification!');
+            };
+
+            // Simulate real-time notifications for demo
+            setTimeout(() => {
+                if (document.getElementById('freelancerDashboard').classList.contains('active')) {
+                    playNotificationSound();
+                }
+            }, 5000);
+
+        })();
+    </script>
+
+    <style>
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        .screen.hidden {
+            transform: translateX(100%);
+        }
+        
+        .screen.active {
+            transform: translateX(0);
+        }
+
+        /* Custom scrollbar for mobile feel */
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+
+        /* Smooth focus transitions */
+        input:focus, select:focus, textarea:focus {
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+    </style>
+</body>
+</html>

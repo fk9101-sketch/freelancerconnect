@@ -1,0 +1,98 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "reviews": {
+      "name": "reviews",
+      "schema": "",
+      "columns": [
+        {
+          "name": "id",
+          "type": "varchar",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "customer_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": null
+        },
+        {
+          "name": "freelancer_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": null
+        },
+        {
+          "name": "rating",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": null
+        },
+        {
+          "name": "review_text",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "IDX_reviews_freelancer_id",
+          "columns": ["freelancer_id"]
+        },
+        {
+          "name": "IDX_reviews_customer_id",
+          "columns": ["customer_id"]
+        },
+        {
+          "name": "IDX_reviews_created_at",
+          "columns": ["created_at"]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "reviews_customer_id_users_id_fk",
+          "tableFrom": "reviews",
+          "tableTo": "users",
+          "columnsFrom": ["customer_id"],
+          "columnsTo": ["id"]
+        },
+        {
+          "name": "reviews_freelancer_id_freelancer_profiles_id_fk",
+          "tableFrom": "reviews",
+          "tableTo": "freelancer_profiles",
+          "columnsFrom": ["freelancer_id"],
+          "columnsTo": ["id"]
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "unique_customer_freelancer_review",
+          "columns": ["customer_id", "freelancer_id"]
+        }
+      ]
+    }
+  }
+}
+

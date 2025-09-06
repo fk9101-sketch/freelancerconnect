@@ -33,5 +33,9 @@ export default defineConfig({
       strict: true,
       deny: ["**/.*"],
     },
+    hmr: false, // Disable HMR to prevent auto-refresh
+    watch: {
+      ignored: ['**/node_modules/**', '**/dist/**']
+    }
   },
 });

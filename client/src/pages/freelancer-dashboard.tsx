@@ -1,23 +1,61 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
+import { useFreelancerProfile } from "@/hooks/useFreelancerProfile";
 import { useToast } from "@/hooks/use-toast";
+import { useInquiryNotifications } from "@/hooks/useInquiryNotifications";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { signOutUser } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import LeadCard from "@/components/lead-card";
+import AcceptedJobCard from "@/components/accepted-job-card";
 import Navigation from "@/components/navigation";
+import LeadNotification from "@/components/lead-notification";
+import InquiryNotification from "@/components/inquiry-notification";
+import { useLeadNotifications } from "@/hooks/useLeadNotifications";
+import { useNotifications } from "@/hooks/useNotifications";
+import NotificationDropdown from "@/components/notification-dropdown";
 import type { FreelancerProfile, LeadWithRelations, Subscription } from "@shared/schema";
 
 export default function FreelancerDashboard() {
   const { user: firebaseUser, isAuthenticated, isLoading } = useFirebaseAuth();
+  const { freelancerProfile, isLoading: profileLoading, refetch } = useFreelancerProfile();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [newLeadsCount, setNewLeadsCount] = useState(0);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const notificationTriggerRef = useRef<HTMLDivElement>(null);
+  const profileDropdownRef = useRef<HTMLDivElement>(null);
+  
+  // Lead notifications
+  const { 
+    currentNotification, 
+    hasLeadPlan, 
+    acceptLead, 
+    dismissNotification
+  } = useLeadNotifications();
+
+  // General notifications
+  const {
+    unreadCount,
+    isDropdownOpen,
+    toggleDropdown,
+    closeDropdown,
+    refreshNotifications
+  } = useNotifications();
+
+  // Inquiry notifications
+  const { 
+    currentNotification: inquiryNotification, 
+    dismissNotification: dismissInquiryNotification, 
+    viewInquiry,
+    hasNewInquiries 
+  } = useInquiryNotifications();
 
   // Redirect to landing if not authenticated
   useEffect(() => {
@@ -27,78 +65,131 @@ export default function FreelancerDashboard() {
     }
   }, [isAuthenticated, isLoading, setLocation]);
 
-  // Mock data for now since backend API is using different auth
-  const profile: FreelancerProfile = {
-    id: 'mock-freelancer-1',
-    userId: firebaseUser?.uid || 'mock-user',
-    categoryId: '1',
-    workingAreas: ['Mumbai', 'Navi Mumbai'],
-    bio: 'Experienced professional offering quality services',
-    experience: '5 years',
-    isAvailable: true,
-    verificationStatus: 'approved',
-    profileCompletionScore: 85,
-    lastSeen: new Date(),
-    createdAt: new Date(),
-    updatedAt: new Date(),
+  // Role verification is now handled by ProtectedRoute in App.tsx
+
+  // Get freelancer name for welcome message
+  const getFreelancerName = () => {
+    if (freelancerProfile?.fullName) {
+      return freelancerProfile.fullName;
+    }
+    if (firebaseUser?.displayName) {
+      return firebaseUser.displayName;
+    }
+    if (firebaseUser?.email) {
+      return firebaseUser.email.split('@')[0];
+    }
+    return 'Freelancer';
   };
 
-  const subscriptions: Subscription[] = [];
-  const availableLeads: LeadWithRelations[] = [
-    {
-      id: 'lead-1',
-      title: 'Home Electrical Repair',
-      description: 'Need to fix electrical issues in kitchen',
-      budgetMin: 2000,
-      budgetMax: 5000,
-      location: 'Bandra, Mumbai',
-      pincode: '400050',
-      categoryId: '1',
-      customerId: 'customer-1',
-      status: 'pending',
-      preferredTime: 'Morning',
-      photos: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      customer: {
-        id: 'customer-1',
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john@example.com',
-        role: 'customer' as const,
-        profileImageUrl: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      category: {
-        id: '1',
-        name: 'Electrical',
-        color: '#FFA500',
-        icon: 'fas fa-bolt',
-        createdAt: new Date(),
-        isActive: true,
-      },
+  // Fetch subscriptions - use the same query key as useLeadNotifications for consistency
+  const { data: subscriptions = [], isLoading: subscriptionsLoading } = useQuery<Subscription[]>({
+    queryKey: ['/api/freelancer/subscriptions'],
+    queryFn: async () => {
+      try {
+        const response = await apiRequest('GET', '/api/freelancer/subscriptions');
+        console.log('Subscriptions API response:', response);
+        
+        // Parse the response to get the JSON data
+        const jsonData = await response.json();
+        console.log('Parsed subscriptions data:', jsonData);
+        
+        // Ensure we return an array
+        if (Array.isArray(jsonData)) {
+          return jsonData;
+        } else {
+          console.warn('Unexpected subscriptions response format:', jsonData);
+          return [];
+        }
+      } catch (error) {
+        console.error('Error fetching subscriptions:', error);
+        return [];
+      }
     },
-  ];
-  const acceptedLeads: LeadWithRelations[] = [];
-  
-  const profileLoading = false;
-  const subscriptionsLoading = false;
-  const availableLeadsLoading = false;
-  const acceptedLeadsLoading = false;
+    enabled: isAuthenticated && !!freelancerProfile,
+    retry: 2,
+  });
+
+  // Fetch available leads (both free and paid freelancers can see leads)
+  const { data: availableLeads = [], isLoading: availableLeadsLoading } = useQuery<LeadWithRelations[]>({
+    queryKey: ['/api/freelancer/leads/notifications'],
+    queryFn: async () => {
+      try {
+        const response = await apiRequest('GET', '/api/freelancer/leads/notifications');
+        console.log('Available leads API response:', response);
+        
+        // Parse the response to get the JSON data
+        const jsonData = await response.json();
+        console.log('Parsed available leads data:', jsonData);
+        
+        // Ensure we return an array
+        if (Array.isArray(jsonData)) {
+          return jsonData;
+        } else {
+          console.warn('Unexpected available leads response format:', jsonData);
+          return [];
+        }
+      } catch (error) {
+        console.error('Error fetching available leads:', error);
+        return [];
+      }
+    },
+    enabled: isAuthenticated && !!freelancerProfile,
+    retry: 2,
+  });
+
+  // Fetch accepted leads
+  const { data: acceptedLeads = [], isLoading: acceptedLeadsLoading } = useQuery<LeadWithRelations[]>({
+    queryKey: ['/api/freelancer/leads/accepted'],
+    queryFn: async () => {
+      try {
+        const response = await apiRequest('GET', '/api/freelancer/leads/accepted');
+        console.log('Accepted leads API response:', response);
+        
+        // Parse the response to get the JSON data
+        const jsonData = await response.json();
+        console.log('Parsed accepted leads data:', jsonData);
+        
+        // Ensure we return an array
+        if (Array.isArray(jsonData)) {
+          return jsonData;
+        } else {
+          console.warn('Unexpected accepted leads response format:', jsonData);
+          return [];
+        }
+      } catch (error) {
+        console.error('Error fetching accepted leads:', error);
+        return [];
+      }
+    },
+    enabled: isAuthenticated && !!freelancerProfile,
+    retry: 2,
+  });
+
+  // Update new leads count when available leads change
+  useEffect(() => {
+    if (availableLeads && Array.isArray(availableLeads)) {
+      setNewLeadsCount(availableLeads.length);
+    } else {
+      setNewLeadsCount(0);
+    }
+  }, [availableLeads]);
 
   // Accept lead mutation
   const acceptLeadMutation = useMutation({
     mutationFn: async (leadId: string) => {
-      await apiRequest('POST', `/api/freelancer/leads/${leadId}/accept`);
+      const response = await apiRequest('POST', `/api/freelancer/leads/${leadId}/accept`);
+      return response.json();
     },
-    onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Lead accepted successfully!",
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/freelancer/leads/available'] });
+    onSuccess: (data) => {
+      if (data.success) {
+        toast({
+          title: "Success",
+          description: "Lead accepted successfully!",
+        });
+      }
+      queryClient.invalidateQueries({ queryKey: ['/api/freelancer/leads/notifications'] });
       queryClient.invalidateQueries({ queryKey: ['/api/freelancer/leads/accepted'] });
+      queryClient.invalidateQueries({ queryKey: ['freelancer-lead-plan'] });
     },
     onError: (error: any) => {
       if (isUnauthorizedError(error)) {
@@ -110,46 +201,22 @@ export default function FreelancerDashboard() {
         setTimeout(() => {
           window.location.href = "/api/login";
         }, 500);
-        return;
-      }
-      
-      toast({
-        title: "Error",
-        description: error.message || "Failed to accept lead",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Express interest mutation
-  const expressInterestMutation = useMutation({
-    mutationFn: async (leadId: string) => {
-      await apiRequest('POST', `/api/freelancer/leads/${leadId}/interest`);
-    },
-    onSuccess: () => {
-      toast({
-        title: "Interest Expressed",
-        description: "Your interest has been recorded!",
-      });
-    },
-    onError: (error: any) => {
-      if (isUnauthorizedError(error)) {
+      } else if (error.status === 403) {
         toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
+          title: "Lead Plan Required",
+          description: "Upgrade to Lead Plan to accept leads instantly.",
           variant: "destructive",
         });
         setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
+          setLocation('/subscription-plans');
+        }, 2000);
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to accept lead. Please try again.",
+          variant: "destructive",
+        });
       }
-      
-      toast({
-        title: "Error",
-        description: error.message || "Failed to express interest",
-        variant: "destructive",
-      });
     },
   });
 
@@ -157,27 +224,88 @@ export default function FreelancerDashboard() {
     acceptLeadMutation.mutate(leadId);
   };
 
-  const handleExpressInterest = (leadId: string) => {
-    expressInterestMutation.mutate(leadId);
-  };
-
   const handleViewPlans = () => {
-    setLocation('/plans');
+    setLocation('/subscription-plans');
   };
 
-  // Check if user has active lead plan
-  const hasActiveLeadPlan = subscriptions?.some(
-    sub => sub.type === 'lead' && sub.status === 'active' && new Date(sub.endDate) > new Date()
-  );
-
-  // Reset new leads count when viewing available leads
-  useEffect(() => {
-    if (availableLeads) {
-      setNewLeadsCount(0);
+  const handleLogout = async () => {
+    try {
+      await signOutUser();
+      localStorage.removeItem('selectedRole');
+      setLocation('/');
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out.",
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to logout. Please try again.",
+        variant: "destructive",
+      });
     }
-  }, [availableLeads]);
+  };
 
-  if (isLoading || profileLoading) {
+  // Close profile dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target as Node)) {
+        setIsProfileDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const hasActiveLeadPlan = () => {
+    // Calculate hasLeadPlan from subscriptions data with proper validation
+    const hasPlan = subscriptions.some((sub: any) => 
+      sub && 
+      sub.status === 'active' && 
+      sub.type === 'lead' && 
+      sub.endDate && 
+      new Date(sub.endDate) > new Date()
+    );
+    
+    console.log('🔍 Checking lead plan status:', {
+      subscriptions: subscriptions.length,
+      hasPlan,
+      subscriptionDetails: subscriptions.filter((sub: any) => sub && sub.type === 'lead').map((sub: any) => ({
+        id: sub.id,
+        type: sub.type,
+        status: sub.status,
+        endDate: sub.endDate,
+        isActive: sub.status === 'active' && new Date(sub.endDate) > new Date()
+      }))
+    });
+    
+    return hasPlan;
+  };
+
+  const getActivePositionPlans = () => {
+    return subscriptions.filter((sub: any) => 
+      sub && 
+      sub.status === 'active' && 
+      sub.type === 'position' && 
+      sub.endDate && 
+      new Date(sub.endDate) > new Date()
+    );
+  };
+
+  const getPositionLabel = (position: number) => {
+    switch (position) {
+      case 1: return 'I';
+      case 2: return 'II';
+      case 3: return 'III';
+      default: return position.toString();
+    }
+  };
+
+  if (isLoading || profileLoading || subscriptionsLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="spinner"></div>
@@ -185,52 +313,157 @@ export default function FreelancerDashboard() {
     );
   }
 
-  // If no profile exists, redirect to profile creation
-  if (!profile) {
-    setLocation('/freelancer/profile-setup');
-    return null;
-  }
-
   return (
-    <div className="min-h-screen pb-20 bg-background text-foreground">
-      {/* Status Bar */}
-      <div className="status-bar">
-        <span>9:41 AM</span>
-        <div className="flex space-x-1">
-          <i className="fas fa-signal"></i>
-          <i className="fas fa-wifi"></i>
-          <i className="fas fa-battery-three-quarters"></i>
-        </div>
+    <div className="min-h-screen pb-24 bg-background text-foreground">
+      {/* Company Logo/Header */}
+      <div className="bg-gradient-purple py-4 px-6">
+        <h1 className="text-3xl font-bold text-white text-center tracking-tight">
+          Freelancer Connect
+        </h1>
       </div>
-
+      
       {/* Header */}
       <div className="bg-gradient-purple text-white p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-xl font-bold mb-1" data-testid="text-freelancer-greeting">
-              Welcome, {firebaseUser?.displayName || firebaseUser?.email?.split('@')[0] || 'Freelancer'}!
+              Welcome, {getFreelancerName()}!
             </h2>
             <div className="flex items-center space-x-3">
-              <span className="text-purple-100">Professional Freelancer</span>
+              <span className="text-purple-100">
+                {freelancerProfile?.professionalTitle || 'Professional Freelancer'}
+              </span>
               <div className="flex items-center space-x-2">
                 <span className="bg-green-400 w-2 h-2 rounded-full"></span>
-                <span className="text-xs text-purple-200">Available</span>
+                <span className="text-xs text-purple-200">
+                  {freelancerProfile?.isAvailable ? 'Available' : 'Unavailable'}
+                </span>
               </div>
             </div>
           </div>
           <div className="flex items-center space-x-3">
-            {profile.verificationStatus === 'approved' && (
+            {freelancerProfile?.verificationStatus === 'approved' && (
               <Badge className="bg-green-500/20 text-green-300 border-green-500/30">
                 <i className="fas fa-check-circle mr-1"></i>
                 VERIFIED
               </Badge>
             )}
-            <div className="relative">
-              <i className="fas fa-bell text-xl opacity-80"></i>
-              {newLeadsCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center" data-testid="notification-dot">
-                  {newLeadsCount}
-                </span>
+            <div className="relative" ref={notificationTriggerRef}>
+              <button
+                onClick={toggleDropdown}
+                className="relative p-2 hover:bg-white hover:bg-opacity-20 rounded-full transition-colors"
+              >
+                <i className="fas fa-bell text-xl opacity-80"></i>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse" data-testid="notification-badge">
+                    {unreadCount}
+                  </span>
+                )}
+                {hasNewInquiries && (
+                  <span className="absolute -top-2 -right-8 bg-green-500 text-white text-xs rounded-full w-3 h-3 flex items-center justify-center animate-pulse"></span>
+                )}
+              </button>
+              
+              {/* Notification Dropdown */}
+              <NotificationDropdown
+                isOpen={isDropdownOpen}
+                onClose={closeDropdown}
+                triggerRef={notificationTriggerRef}
+              />
+            </div>
+            
+            {/* Profile Picture with Dropdown */}
+            <div className="relative" ref={profileDropdownRef}>
+              <button
+                onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                className="w-10 h-10 rounded-full overflow-hidden border-2 border-white/30 hover:border-white/50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/50"
+              >
+                {firebaseUser?.photoURL ? (
+                  <img
+                    src={firebaseUser.photoURL}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-white/20 flex items-center justify-center">
+                    <i className="fas fa-user text-white text-lg"></i>
+                  </div>
+                )}
+              </button>
+              
+              {/* Profile Dropdown Menu */}
+              {isProfileDropdownOpen && (
+                <div className="absolute right-0 top-12 w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50 animate-in slide-in-from-top-2 duration-200">
+                  <div className="py-2">
+                    <button
+                      onClick={() => {
+                        setLocation('/freelancer/profile');
+                        setIsProfileDropdownOpen(false);
+                      }}
+                      className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors duration-150 flex items-center space-x-3"
+                    >
+                      <i className="fas fa-user text-gray-600 w-5"></i>
+                      <span className="text-gray-800 font-medium">My Profile</span>
+                    </button>
+                    
+                    <button
+                      onClick={() => {
+                        setLocation('/freelancer/messages');
+                        setIsProfileDropdownOpen(false);
+                      }}
+                      className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors duration-150 flex items-center space-x-3"
+                    >
+                      <i className="fas fa-envelope text-gray-600 w-5"></i>
+                      <span className="text-gray-800 font-medium">My Leads</span>
+                    </button>
+                    
+                    <button
+                      onClick={() => {
+                        setLocation('/my-plans');
+                        setIsProfileDropdownOpen(false);
+                      }}
+                      className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors duration-150 flex items-center space-x-3"
+                    >
+                      <i className="fas fa-credit-card text-gray-600 w-5"></i>
+                      <span className="text-gray-800 font-medium">My Plans</span>
+                    </button>
+                    
+                    <button
+                      onClick={() => {
+                        setLocation('/rewards-offers');
+                        setIsProfileDropdownOpen(false);
+                      }}
+                      className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors duration-150 flex items-center space-x-3"
+                    >
+                      <i className="fas fa-gift text-gray-600 w-5"></i>
+                      <span className="text-gray-800 font-medium">Reward</span>
+                    </button>
+                    
+                    <button
+                      onClick={() => {
+                        setLocation('/freelancer/more');
+                        setIsProfileDropdownOpen(false);
+                      }}
+                      className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors duration-150 flex items-center space-x-3"
+                    >
+                      <i className="fas fa-headset text-gray-600 w-5"></i>
+                      <span className="text-gray-800 font-medium">Help & Support</span>
+                    </button>
+                    
+                    <div className="border-t border-gray-100 my-1"></div>
+                    
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setIsProfileDropdownOpen(false);
+                      }}
+                      className="w-full px-4 py-3 text-left hover:bg-red-50 transition-colors duration-150 flex items-center space-x-3"
+                    >
+                      <i className="fas fa-sign-out-alt text-red-500 w-5"></i>
+                      <span className="text-red-600 font-medium">Logout</span>
+                    </button>
+                  </div>
+                </div>
               )}
             </div>
           </div>
@@ -240,7 +473,7 @@ export default function FreelancerDashboard() {
         <div className="grid grid-cols-3 gap-3">
           <div className="bg-white bg-opacity-20 rounded-xl p-3 text-center">
             <p className="text-2xl font-bold" data-testid="text-new-leads-count">
-              {availableLeads?.length || 0}
+              {Array.isArray(availableLeads) ? availableLeads.length : 0}
             </p>
             <p className="text-xs text-purple-100">New Leads</p>
           </div>
@@ -249,7 +482,7 @@ export default function FreelancerDashboard() {
             <p className="text-xs text-purple-100">This Month</p>
           </div>
           <div className="bg-white bg-opacity-20 rounded-xl p-3 text-center">
-            <p className="text-2xl font-bold">{profile.rating}</p>
+            <p className="text-2xl font-bold">{freelancerProfile?.rating || '0'}</p>
             <p className="text-xs text-purple-100">Rating</p>
           </div>
         </div>
@@ -257,15 +490,17 @@ export default function FreelancerDashboard() {
 
       {/* Subscription Status */}
       <div className="p-4">
-        {hasActiveLeadPlan ? (
+        {hasActiveLeadPlan() ? (
           <div className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl p-4 mb-4">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-semibold">Lead Plan Active</h3>
                 <p className="text-sm text-green-100">
-                  Expires on {new Date(
-                    subscriptions?.find(s => s.type === 'lead')?.endDate || ''
-                  ).toLocaleDateString()}
+                  Expires on {(() => {
+                    if (!subscriptions || !Array.isArray(subscriptions)) return 'Unknown';
+                    const leadPlan = subscriptions.find(s => s && typeof s === 'object' && s.type === 'lead');
+                    return leadPlan?.endDate ? new Date(leadPlan.endDate).toLocaleDateString() : 'Unknown';
+                  })()}
                 </p>
               </div>
               <i className="fas fa-crown text-xl"></i>
@@ -292,66 +527,133 @@ export default function FreelancerDashboard() {
           </Card>
         )}
 
+        {/* Position Plan Status */}
+        {(() => {
+          const activePositionPlans = getActivePositionPlans();
+          return activePositionPlans.length > 0 ? (
+            <div className="space-y-3 mb-4">
+              {activePositionPlans.map((plan: any) => (
+                <div key={plan.id} className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-xl p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold">Position {getPositionLabel(plan.position)} Plan Active</h3>
+                      <p className="text-sm text-yellow-100">
+                        {plan.area} • Expires on {new Date(plan.endDate).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="bg-yellow-400 text-yellow-800 px-3 py-1 rounded-full font-bold text-lg">
+                        {getPositionLabel(plan.position)}
+                      </div>
+                      <i className="fas fa-crown text-xl"></i>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : null;
+        })()}
+
         {/* New Leads */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-on-surface">New Leads</h3>
-            <Button variant="ghost" size="sm" className="text-primary text-sm font-medium">
-              View All
-            </Button>
+            <h3 className="font-bold text-foreground text-lg">New Leads</h3>
+            <div className="flex space-x-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setLocation('/freelancer/leads')}
+              >
+                View All
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setLocation('/freelancer/messages')}
+                className={hasNewInquiries ? "border-green-500 text-green-600" : ""}
+              >
+                {hasNewInquiries && <span className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>}
+                Inquiries
+              </Button>
+            </div>
           </div>
-
+          
           {availableLeadsLoading ? (
-            <div className="flex justify-center py-8">
+            <div className="flex items-center justify-center py-8">
               <div className="spinner"></div>
             </div>
-          ) : (
+          ) : Array.isArray(availableLeads) && availableLeads.length > 0 ? (
             <div className="space-y-3">
-              {availableLeads && availableLeads.length > 0 ? (
-                availableLeads.slice(0, 3).map((lead) => (
-                  <LeadCard
-                    key={lead.id}
-                    lead={lead}
-                    canAccept={hasActiveLeadPlan}
-                    onAccept={() => handleAcceptLead(lead.id)}
-                    onExpressInterest={() => handleExpressInterest(lead.id)}
-                    isAccepting={acceptLeadMutation.isPending}
-                    isExpressingInterest={expressInterestMutation.isPending}
-                  />
-                ))
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <i className="fas fa-inbox text-4xl mb-4"></i>
-                  <p>No new leads available</p>
-                </div>
-              )}
+              {availableLeads.slice(0, 3).map((lead) => (
+                <LeadCard
+                  key={lead.id}
+                  lead={lead}
+                  canAccept={hasActiveLeadPlan()}
+                  onAccept={() => handleAcceptLead(lead.id)}
+                  isAccepting={acceptLeadMutation.isPending}
+                />
+              ))}
             </div>
+          ) : (
+            <Card className="bg-gray-50 border-gray-200">
+              <CardContent className="p-6 text-center">
+                <i className="fas fa-inbox text-3xl text-gray-400 mb-3"></i>
+                <h4 className="font-semibold text-gray-600 mb-2">No New Leads</h4>
+                <p className="text-sm text-gray-500">Check back later for new opportunities</p>
+              </CardContent>
+            </Card>
           )}
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-2 gap-3">
-          <Button
-            variant="outline"
-            className="bg-white border border-gray-200 rounded-xl p-4 text-center hover:shadow-md transition-shadow h-auto flex-col"
-            data-testid="button-analytics"
-          >
-            <i className="fas fa-chart-line text-primary text-xl mb-2"></i>
-            <p className="text-sm font-medium text-gray-700">Analytics</p>
-          </Button>
-          <Button
-            variant="outline"
-            className="bg-white border border-gray-200 rounded-xl p-4 text-center hover:shadow-md transition-shadow h-auto flex-col"
-            data-testid="button-export-data"
-          >
-            <i className="fas fa-download text-primary text-xl mb-2"></i>
-            <p className="text-sm font-medium text-gray-700">Export Data</p>
-          </Button>
+        {/* Accepted Leads */}
+        <div className="mb-6">
+          <h3 className="font-bold text-foreground text-lg mb-4">Accepted Leads</h3>
+          
+          {acceptedLeadsLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="spinner"></div>
+            </div>
+          ) : Array.isArray(acceptedLeads) && acceptedLeads.length > 0 ? (
+            <div className="space-y-3">
+              {acceptedLeads.map((lead) => (
+                <AcceptedJobCard
+                  key={lead.id}
+                  lead={lead}
+                />
+              ))}
+            </div>
+          ) : (
+            <Card className="bg-gray-50 border-gray-200">
+              <CardContent className="p-6 text-center">
+                <i className="fas fa-handshake text-3xl text-gray-400 mb-3"></i>
+                <h4 className="font-semibold text-gray-600 mb-2">No Accepted Leads</h4>
+                <p className="text-sm text-gray-500">Accept leads to see them here</p>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
 
-      {/* Bottom Navigation */}
-      <Navigation />
+      <Navigation currentPage="dashboard" userRole="freelancer" />
+      
+      {/* Lead Ring Notification */}
+      {currentNotification && (
+        <LeadNotification
+          leadData={currentNotification}
+          onAccept={acceptLead}
+          onDismiss={dismissNotification}
+          hasLeadPlan={hasActiveLeadPlan()}
+        />
+      )}
+
+      {/* Inquiry Notification */}
+      {inquiryNotification && (
+        <InquiryNotification
+          notification={inquiryNotification}
+          onDismiss={dismissInquiryNotification}
+          onView={viewInquiry}
+        />
+      )}
     </div>
   );
 }

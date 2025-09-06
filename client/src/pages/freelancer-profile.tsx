@@ -11,11 +11,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Navigation from "@/components/navigation";
-import { CircularProgress } from "@/components/CircularProgress";
-import { ObjectUploader } from "@/components/ObjectUploader";
+
+import { SimpleFileUploader } from "@/components/SimpleFileUploader";
+import { ProfilePhotoUploader } from "@/components/ProfilePhotoUploader";
+import { AreaAutoSuggest } from "@/components/AreaAutoSuggest";
+import { CategoryAutoSuggest } from "@/components/CategoryAutoSuggest";
 import { insertFreelancerProfileSchema, type InsertFreelancerProfileForm } from "@shared/schema";
-import type { UploadResult } from "@uppy/core";
+
 import { Clock, MapPin, DollarSign, Star, Upload, Camera, FileText, Award, Shield } from "lucide-react";
 
 export default function FreelancerProfile() {
@@ -26,12 +30,113 @@ export default function FreelancerProfile() {
   const [portfolioImages, setPortfolioImages] = useState<string[]>([]);
   const [idProofUrl, setIdProofUrl] = useState<string>("");
 
+  const [customCategory, setCustomCategory] = useState<string>("");
+  const [selectedCategoryName, setSelectedCategoryName] = useState<string>("");
+  
+  // State for categories - moved to top to avoid initialization error
+  const [categories, setCategories] = useState<any[]>([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
+
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       setLocation('/');
       return;
     }
   }, [isAuthenticated, isLoading, setLocation]);
+
+  // Load freelancer profile on component mount
+  useEffect(() => {
+    if (firebaseUser?.uid) {
+      fetchFreelancerProfile();
+    }
+  }, [firebaseUser?.uid, categories]); // Add categories dependency
+
+  const fetchFreelancerProfile = async () => {
+    try {
+      const response = await fetch('/api/freelancer/profile', {
+        headers: {
+          'Authorization': `Bearer ${await firebaseUser?.getIdToken()}`,
+          'X-Firebase-User-ID': firebaseUser?.uid || ''
+        }
+      });
+      if (response.ok) {
+        const profileData = await response.json();
+
+        // Update other profile fields if needed
+        if (profileData.fullName) {
+          form.setValue('fullName', profileData.fullName);
+        }
+        if (profileData.professionalTitle) {
+          form.setValue('professionalTitle', profileData.professionalTitle);
+        }
+        if (profileData.area) {
+          form.setValue('area', profileData.area);
+        }
+        if (profileData.bio) {
+          form.setValue('bio', profileData.bio);
+        }
+        if (profileData.experience) {
+          form.setValue('experience', profileData.experience);
+        }
+        if (profileData.hourlyRate) {
+          form.setValue('hourlyRate', profileData.hourlyRate);
+        }
+
+        if (profileData.skills) {
+          form.setValue('skills', profileData.skills);
+        }
+        if (profileData.certifications) {
+          form.setValue('certifications', profileData.certifications);
+        }
+        if (profileData.profilePhotoUrl) {
+          setProfilePhoto(profileData.profilePhotoUrl);
+          form.setValue('profilePhotoUrl', profileData.profilePhotoUrl);
+        }
+        if (profileData.categoryId) {
+          setSelectedCategoryId(profileData.categoryId);
+          // Use the category name from the joined query if available
+          if (profileData.category) {
+            setSelectedCategoryName(profileData.category.name);
+          } else {
+            // Fallback to finding the category name from the categories list
+            const category = categories.find(cat => cat.id === profileData.categoryId);
+            if (category) {
+              setSelectedCategoryName(category.name);
+            }
+          }
+          // Also set the input value for display
+          form.setValue('categoryId', profileData.categoryId);
+          // Clear custom category when using predefined category
+          setCustomCategory('');
+        }
+        if (profileData.customCategory) {
+          setCustomCategory(profileData.customCategory);
+          // Clear any selected category when using custom
+          setSelectedCategoryId('');
+          setSelectedCategoryName('');
+          // Clear the form value for categoryId
+          form.setValue('categoryId', '');
+        }
+      } else if (response.status === 404) {
+        console.log('Profile not found, this is normal for new users');
+        // Don't show error for 404, as new users won't have a profile yet
+      } else {
+        console.error('Error fetching freelancer profile:', response.status, response.statusText);
+        toast({
+          title: "Error",
+          description: "Failed to load profile. Please try refreshing the page.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching freelancer profile:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load profile. Please try refreshing the page.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -66,13 +171,50 @@ export default function FreelancerProfile() {
     return 'User';
   };
 
+
+
+  // Category selection handlers
+  const handleCategorySelect = (categoryId: string, categoryName: string) => {
+    setSelectedCategoryId(categoryId);
+    setSelectedCategoryName(categoryName);
+    setCustomCategory(''); // Clear custom category when selecting predefined one
+  };
+
+  const handleCustomCategoryChange = (customCategoryName: string) => {
+    setCustomCategory(customCategoryName);
+    setSelectedCategoryId(''); // Clear selected category when using custom
+    setSelectedCategoryName(''); // Clear selected category name
+  };
+
+  // Fetch categories on component mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('/api/categories');
+        if (response.ok) {
+          const categoriesData = await response.json();
+          setCategories(categoriesData);
+          // Set the first category as default
+          if (categoriesData.length > 0) {
+            setSelectedCategoryId(categoriesData[0].id);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
   // Mock profile data for demonstration
   const mockProfile: InsertFreelancerProfileForm = {
     userId: firebaseUser?.uid || '',
-    categoryId: '1',
+    categoryId: selectedCategoryId || '',
+    fullName: getUserName(), // Use the user's name from Firebase or email
     professionalTitle: 'Senior Electrician',
     profilePhotoUrl: profilePhoto,
-    workingAreas: ['Mumbai', 'Navi Mumbai', 'Thane'],
+    area: '', // Single area field
     bio: 'Experienced electrician with 8+ years of expertise in residential and commercial electrical work.',
     experience: '8',
     experienceDescription: 'Started as an apprentice and worked my way up to handling complex electrical installations, maintenance, and repairs for both residential and commercial properties.',
@@ -81,17 +223,9 @@ export default function FreelancerProfile() {
     certifications: ['Licensed Electrician', 'Safety Training Certificate'],
     idProofUrl: idProofUrl,
     hourlyRate: '₹500-800',
+    customCategory: customCategory, // For custom service categories
     verificationStatus: 'approved',
     isAvailable: true,
-    availabilitySchedule: {
-      monday: { available: true, hours: '9:00 AM - 6:00 PM' },
-      tuesday: { available: true, hours: '9:00 AM - 6:00 PM' },
-      wednesday: { available: true, hours: '9:00 AM - 6:00 PM' },
-      thursday: { available: true, hours: '9:00 AM - 6:00 PM' },
-      friday: { available: true, hours: '9:00 AM - 6:00 PM' },
-      saturday: { available: true, hours: '10:00 AM - 4:00 PM' },
-      sunday: { available: false, hours: 'Closed' }
-    },
     verificationDocs: []
   };
 
@@ -101,114 +235,152 @@ export default function FreelancerProfile() {
     defaultValues: mockProfile,
   });
 
-  // Calculate profile completion score
-  const calculateProfileCompletion = (profile: InsertFreelancerProfileForm): number => {
-    const requiredFields = [
-      'professionalTitle',
-      'bio', 
-      'experience',
-      'workingAreas',
-      'hourlyRate'
-    ];
-    
-    const optionalFields = [
-      'profilePhotoUrl',
-      'experienceDescription', 
-      'skills',
-      'portfolioImages',
-      'certifications',
-      'idProofUrl',
-      'availabilitySchedule'
-    ];
 
-    let score = 0;
-
-    // Required fields (70% weight)
-    requiredFields.forEach(field => {
-      const value = profile[field as keyof InsertFreelancerProfileForm];
-      if (value && (Array.isArray(value) ? value.length > 0 : value.toString().trim())) {
-        score += 70 / requiredFields.length;
-      }
-    });
-
-    // Optional fields (30% weight) 
-    optionalFields.forEach(field => {
-      const value = profile[field as keyof InsertFreelancerProfileForm];
-      if (value && (Array.isArray(value) ? value.length > 0 : value.toString().trim())) {
-        score += 30 / optionalFields.length;
-      }
-    });
-
-    return Math.round(score);
-  };
-
-  const currentProfile = form.watch();
-  const completionScore = calculateProfileCompletion(currentProfile);
 
   // Field completion status
   const getFieldStatus = (fieldName: keyof InsertFreelancerProfileForm) => {
-    const value = currentProfile[fieldName];
+    const value = form.watch(fieldName);
     return value && (Array.isArray(value) ? value.length > 0 : value.toString().trim());
   };
 
   // Upload handlers
-  const handleGetUploadParameters = async () => {
-    // Mock upload URL for demo - in real app this would call the backend
-    return {
-      method: 'PUT' as const,
-      url: 'https://example.com/upload',
-    };
+  const handleProfilePhotoUpload = (fileUrl: string) => {
+    setProfilePhoto(fileUrl);
+    form.setValue('profilePhotoUrl', fileUrl);
   };
 
-  const handleProfilePhotoUpload = (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
-    if (result.successful && result.successful[0]?.uploadURL) {
-      const photoUrl = result.successful[0].uploadURL;
-      setProfilePhoto(photoUrl);
-      form.setValue('profilePhotoUrl', photoUrl);
-      toast({
-        title: "Profile photo uploaded",
-        description: "Your profile photo has been updated successfully.",
-      });
-    }
+  const handlePortfolioUpload = (fileUrl: string) => {
+    const updatedImages = [...portfolioImages, fileUrl];
+    setPortfolioImages(updatedImages);
+    form.setValue('portfolioImages', updatedImages);
   };
 
-  const handlePortfolioUpload = (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
-    if (result.successful && result.successful.length > 0) {
-      const newImages = result.successful.map(file => file.uploadURL || '').filter(Boolean);
-      const updatedImages = [...portfolioImages, ...newImages];
-      setPortfolioImages(updatedImages);
-      form.setValue('portfolioImages', updatedImages);
-      toast({
-        title: "Portfolio images uploaded",
-        description: `${newImages.length} image(s) added to your portfolio.`,
-      });
-    }
-  };
-
-  const handleIdProofUpload = (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
-    if (result.successful && result.successful[0]?.uploadURL) {
-      const docUrl = result.successful[0].uploadURL;
-      setIdProofUrl(docUrl);
-      form.setValue('idProofUrl', docUrl);
-      toast({
-        title: "ID proof uploaded",
-        description: "Your ID verification document has been uploaded successfully.",
-      });
-    }
+  const handleIdProofUpload = (fileUrl: string) => {
+    setIdProofUrl(fileUrl);
+    form.setValue('idProofUrl', fileUrl);
   };
 
   const onSubmit = async (data: InsertFreelancerProfileForm) => {
     try {
-      // In real app, this would save to the backend
-      console.log('Profile data:', data);
-      toast({
-        title: "Profile updated",
-        description: "Your freelancer profile has been updated successfully.",
+      // Validate category is selected or custom category is entered
+      if (!selectedCategoryId && !customCategory.trim()) {
+        toast({
+          title: "Category Required",
+          description: "Please select your service category or enter a custom one",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validate custom category length if using custom
+      if (customCategory.trim() && customCategory.trim().length < 3) {
+        toast({
+          title: "Invalid Category",
+          description: "Custom category must be at least 3 characters long",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Prepare profile data with category (exclude userId since it's handled by auth)
+      const { userId: _, ...profileDataWithoutUserId } = data;
+      const profileData = {
+        ...profileDataWithoutUserId,
+        categoryId: selectedCategoryId || null, // Use the selected category or null for custom
+        customCategory: customCategory.trim() || null, // Include custom category if entered
+        area: data.area // Use the area from the form data
+      };
+
+      console.log('Saving profile with category data:', {
+        categoryId: selectedCategoryId,
+        customCategory: customCategory.trim(),
+        selectedCategoryName
       });
-    } catch (error) {
+
+      // Try to save profile with retry logic
+      let response;
+      let retryCount = 0;
+      const maxRetries = 3;
+      
+      while (retryCount < maxRetries) {
+        try {
+          // First try to update existing profile
+          response = await fetch('/api/freelancer/profile', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${await firebaseUser?.getIdToken()}`,
+              'X-Firebase-User-ID': firebaseUser?.uid || ''
+            },
+            body: JSON.stringify(profileData)
+          });
+
+          // If profile doesn't exist (404), try to create it
+          if (response.status === 404) {
+            console.log('Profile not found, creating new profile...');
+            response = await fetch('/api/freelancer/profile', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${await firebaseUser?.getIdToken()}`,
+                'X-Firebase-User-ID': firebaseUser?.uid || ''
+              },
+              body: JSON.stringify(profileData)
+            });
+          }
+          
+          // If successful, break out of retry loop
+          if (response.ok) {
+            break;
+          }
+          
+          // If it's a user linking error, retry after a delay
+          const errorData = await response.json().catch(() => ({}));
+          if (errorData.message && errorData.message.includes('user account could not be linked')) {
+            retryCount++;
+            if (retryCount < maxRetries) {
+              console.log(`Retrying profile save (attempt ${retryCount}/${maxRetries})...`);
+              await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+              continue;
+            }
+          }
+          
+          // For other errors, don't retry
+          break;
+        } catch (fetchError) {
+          retryCount++;
+          if (retryCount < maxRetries) {
+            console.log(`Network error, retrying profile save (attempt ${retryCount}/${maxRetries})...`);
+            await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+            continue;
+          }
+          throw fetchError;
+        }
+      }
+
+      if (response.ok) {
+        const result = await response.json();
+        toast({
+          title: "Profile saved",
+          description: "Your freelancer profile has been saved successfully.",
+        });
+        console.log('Profile saved successfully:', result);
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        let errorMessage = errorData.message || 'Failed to save profile';
+        
+        // If it's an area validation error, show available areas
+        if (errorData.availableAreas && Array.isArray(errorData.availableAreas)) {
+          errorMessage += `\n\nAvailable areas include: ${errorData.availableAreas.join(', ')}`;
+        }
+        
+        throw new Error(errorMessage);
+      }
+    } catch (error: any) {
+      console.error('Error saving profile:', error);
       toast({
         title: "Error",
-        description: "Failed to update profile. Please try again.",
+        description: error.message || "Failed to save profile. Please try again.",
         variant: "destructive",
       });
     }
@@ -227,17 +399,7 @@ export default function FreelancerProfile() {
   };
 
   return (
-    <div className="min-h-screen pb-20 bg-background text-foreground">
-      {/* Status Bar */}
-      <div className="status-bar">
-        <span>9:41 AM</span>
-        <div className="flex space-x-1">
-          <i className="fas fa-signal"></i>
-          <i className="fas fa-wifi"></i>
-          <i className="fas fa-battery-three-quarters"></i>
-        </div>
-      </div>
-
+    <div className="min-h-screen pb-24 bg-background text-foreground profile-page">
       {/* Header */}
       <div className="bg-gradient-purple text-white p-6">
         <div className="flex items-center justify-between mb-4">
@@ -260,20 +422,7 @@ export default function FreelancerProfile() {
           </button>
         </div>
 
-        {/* Profile Completion Score */}
-        <div className="flex items-center justify-center mb-6">
-          <div className="text-center">
-            <CircularProgress 
-              percentage={completionScore} 
-              size={120}
-              className="mb-3"
-            />
-            <h3 className="text-lg font-semibold mb-1">Profile Completion</h3>
-            <p className="text-purple-200 text-sm">
-              {completionScore < 100 ? 'Complete your profile to get more leads!' : 'Your profile is complete!'}
-            </p>
-          </div>
-        </div>
+
       </div>
 
       {/* Profile Content */}
@@ -287,7 +436,7 @@ export default function FreelancerProfile() {
                 <CardTitle className="flex items-center gap-2">
                   <Star className="w-5 h-5 text-yellow-500" />
                   Basic Information
-                  {getFieldStatus('professionalTitle') && getFieldStatus('bio') && (
+                  {getFieldStatus('fullName') && getFieldStatus('professionalTitle') && getFieldStatus('bio') && (
                     <Badge className="bg-green-500/10 text-green-400 border-green-500/20">
                       <i className="fas fa-check w-3 h-3 mr-1"></i>
                       Complete
@@ -297,28 +446,37 @@ export default function FreelancerProfile() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Profile Photo */}
-                <div className="flex items-center space-x-4">
-                  <div className="w-20 h-20 rounded-full bg-muted border-2 border-dashed border-border flex items-center justify-center overflow-hidden">
-                    {profilePhoto ? (
-                      <img src={profilePhoto} alt="Profile" className="w-full h-full object-cover" />
-                    ) : (
-                      <Camera className="w-8 h-8 text-muted-foreground" />
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-medium mb-2">Profile Photo</h4>
-                    <ObjectUploader
-                      maxNumberOfFiles={1}
-                      maxFileSize={5485760} // 5MB
-                      onGetUploadParameters={handleGetUploadParameters}
-                      onComplete={handleProfilePhotoUpload}
-                      buttonClassName="w-full"
-                    >
-                      <Upload className="w-4 h-4 mr-2" />
-                      Upload Photo
-                    </ObjectUploader>
-                  </div>
-                </div>
+                <ProfilePhotoUploader
+                  currentPhotoUrl={profilePhoto}
+                  onPhotoUploaded={handleProfilePhotoUpload}
+                  onPhotoRemoved={() => {
+                    setProfilePhoto('');
+                    form.setValue('profilePhotoUrl', '');
+                  }}
+                  buttonClassName="w-full"
+                >
+                  Upload Photo
+                </ProfilePhotoUploader>
+
+                {/* Full Name */}
+                <FormField
+                  control={form.control}
+                  name="fullName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        Full Name *
+                        {getFieldStatus('fullName') && (
+                          <i className="fas fa-check text-green-400 text-sm"></i>
+                        )}
+                      </FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter your full name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 {/* Professional Title */}
                 <FormField
@@ -340,7 +498,60 @@ export default function FreelancerProfile() {
                   )}
                 />
 
-                {/* Bio */}
+                {/* Category Selection */}
+                <div>
+                  <label className="flex items-center gap-2 mb-2 text-sm font-medium">
+                    Service Category *
+                    {(selectedCategoryId || customCategory.trim()) && (
+                      <i className="fas fa-check text-green-400 text-sm"></i>
+                    )}
+                  </label>
+                  <CategoryAutoSuggest
+                    value={selectedCategoryName || customCategory}
+                    onChange={(categoryId) => {
+                      if (categoryId) {
+                        // If we got a category ID, find the category name
+                        const category = categories.find(cat => cat.id === categoryId);
+                        if (category) {
+                          setSelectedCategoryName(category.name);
+                          setSelectedCategoryId(categoryId);
+                          setCustomCategory('');
+                        }
+                      } else {
+                        // If no category ID, treat as custom category
+                        setCustomCategory('');
+                      }
+                    }}
+                    onCategorySelect={handleCategorySelect}
+                    onCustomCategoryChange={handleCustomCategoryChange}
+                    placeholder="Type your service category (e.g. plumber, electrician)"
+                    required={true}
+                    showCustomOption={true}
+                  />
+                  {/* Display selected category info */}
+                  {selectedCategoryId && selectedCategoryName && (
+                    <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <i className="fas fa-check-circle text-green-500"></i>
+                        <span className="text-sm text-green-700">
+                          Selected category: <strong>{selectedCategoryName}</strong>
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  {customCategory.trim() && (
+                    <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <i className="fas fa-edit text-blue-500"></i>
+                        <span className="text-sm text-blue-700">
+                          Custom category: <strong>{customCategory}</strong>
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                                {/* Bio */}
                 <FormField
                   control={form.control}
                   name="bio"
@@ -363,6 +574,33 @@ export default function FreelancerProfile() {
                     </FormItem>
                   )}
                 />
+
+                {/* Area */}
+                <FormField
+                  control={form.control}
+                  name="area"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        Working Area *
+                        {getFieldStatus('area') && (
+                          <i className="fas fa-check text-green-400 text-sm"></i>
+                        )}
+                      </FormLabel>
+                      <FormControl>
+                        <AreaAutoSuggest
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder="Type your working area (e.g. Vaishali Nagar, Sirsi Road)"
+                          required={true}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+ 
               </CardContent>
             </Card>
 
@@ -448,13 +686,13 @@ export default function FreelancerProfile() {
                     )}
                   </label>
                   <div className="flex flex-wrap gap-2 mb-2">
-                    {currentProfile.skills?.map((skill, index) => (
+                    {form.watch('skills')?.map((skill, index) => (
                       <Badge key={index} variant="secondary">
                         {skill}
                         <button
                           type="button"
                           onClick={() => {
-                            const newSkills = currentProfile.skills?.filter((_, i) => i !== index) || [];
+                            const newSkills = form.watch('skills')?.filter((_, i) => i !== index) || [];
                             form.setValue('skills', newSkills);
                           }}
                           className="ml-2 text-red-400 hover:text-red-600"
@@ -471,8 +709,8 @@ export default function FreelancerProfile() {
                         e.preventDefault();
                         const input = e.target as HTMLInputElement;
                         const skill = input.value.trim();
-                        if (skill && !currentProfile.skills?.includes(skill)) {
-                          const newSkills = [...(currentProfile.skills || []), skill];
+                        if (skill && !form.watch('skills')?.includes(skill)) {
+                          const newSkills = [...(form.watch('skills') || []), skill];
                           form.setValue('skills', newSkills);
                           input.value = '';
                         }
@@ -506,16 +744,16 @@ export default function FreelancerProfile() {
                       </div>
                     ))}
                   </div>
-                  <ObjectUploader
-                    maxNumberOfFiles={5}
+                  <SimpleFileUploader
                     maxFileSize={5485760} // 5MB
-                    onGetUploadParameters={handleGetUploadParameters}
-                    onComplete={handlePortfolioUpload}
+                    acceptedFileTypes={['image/*']}
+                    onUploadComplete={handlePortfolioUpload}
                     buttonClassName="w-full"
+                    multiple={true}
                   >
                     <Upload className="w-4 h-4 mr-2" />
                     Add Portfolio Images
-                  </ObjectUploader>
+                  </SimpleFileUploader>
                 </div>
               </CardContent>
             </Card>
@@ -554,35 +792,7 @@ export default function FreelancerProfile() {
                   )}
                 />
 
-                <div>
-                  <label className="flex items-center gap-2 mb-3 text-sm font-medium">
-                    Availability Schedule
-                    {getFieldStatus('availabilitySchedule') && (
-                      <i className="fas fa-check text-green-400 text-sm"></i>
-                    )}
-                  </label>
-                  <div className="space-y-2">
-                    {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map((day) => (
-                      <div key={day} className="flex items-center justify-between p-3 border rounded-lg">
-                        <span className="capitalize font-medium">{day}</span>
-                        <div className="flex items-center gap-3">
-                          <span className="text-sm text-muted-foreground">
-                            {(currentProfile.availabilitySchedule as any)?.[day]?.hours || 'Closed'}
-                          </span>
-                          <div className="flex items-center gap-2">
-                            <span className={`w-2 h-2 rounded-full ${
-                              (currentProfile.availabilitySchedule as any)?.[day]?.available 
-                                ? 'bg-green-400' : 'bg-red-400'
-                            }`}></span>
-                            <span className="text-sm">
-                              {(currentProfile.availabilitySchedule as any)?.[day]?.available ? 'Available' : 'Closed'}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+
               </CardContent>
             </Card>
 
@@ -609,14 +819,14 @@ export default function FreelancerProfile() {
                     )}
                   </label>
                   <div className="flex flex-wrap gap-2 mb-2">
-                    {currentProfile.certifications?.map((cert, index) => (
+                    {form.watch('certifications')?.map((cert, index) => (
                       <Badge key={index} variant="outline">
                         <FileText className="w-3 h-3 mr-1" />
                         {cert}
                         <button
                           type="button"
                           onClick={() => {
-                            const newCerts = currentProfile.certifications?.filter((_, i) => i !== index) || [];
+                            const newCerts = form.watch('certifications')?.filter((_, i) => i !== index) || [];
                             form.setValue('certifications', newCerts);
                           }}
                           className="ml-2 text-red-400 hover:text-red-600"
@@ -633,8 +843,8 @@ export default function FreelancerProfile() {
                         e.preventDefault();
                         const input = e.target as HTMLInputElement;
                         const cert = input.value.trim();
-                        if (cert && !currentProfile.certifications?.includes(cert)) {
-                          const newCerts = [...(currentProfile.certifications || []), cert];
+                        if (cert && !form.watch('certifications')?.includes(cert)) {
+                          const newCerts = [...(form.watch('certifications') || []), cert];
                           form.setValue('certifications', newCerts);
                           input.value = '';
                         }
@@ -666,16 +876,15 @@ export default function FreelancerProfile() {
                       </button>
                     </div>
                   ) : (
-                    <ObjectUploader
-                      maxNumberOfFiles={1}
+                    <SimpleFileUploader
                       maxFileSize={10485760} // 10MB
-                      onGetUploadParameters={handleGetUploadParameters}
-                      onComplete={handleIdProofUpload}
+                      acceptedFileTypes={['image/*', 'application/pdf']}
+                      onUploadComplete={handleIdProofUpload}
                       buttonClassName="w-full"
                     >
                       <Upload className="w-4 h-4 mr-2" />
                       Upload ID Proof
-                    </ObjectUploader>
+                    </SimpleFileUploader>
                   )}
                 </div>
 
@@ -698,64 +907,7 @@ export default function FreelancerProfile() {
               </CardContent>
             </Card>
 
-            {/* Service Areas Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="w-5 h-5 text-orange-500" />
-                  Service Areas
-                  {getFieldStatus('workingAreas') && (
-                    <Badge className="bg-green-500/10 text-green-400 border-green-500/20">
-                      <i className="fas fa-check w-3 h-3 mr-1"></i>
-                      Complete
-                    </Badge>
-                  )}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <label className="flex items-center gap-2 mb-2 text-sm font-medium">
-                    Areas You Serve *
-                    {getFieldStatus('workingAreas') && (
-                      <i className="fas fa-check text-green-400 text-sm"></i>
-                    )}
-                  </label>
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {currentProfile.workingAreas?.map((area, index) => (
-                      <Badge key={index} variant="outline">
-                        <MapPin className="w-3 h-3 mr-1" />
-                        {area}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const newAreas = currentProfile.workingAreas?.filter((_, i) => i !== index) || [];
-                            form.setValue('workingAreas', newAreas);
-                          }}
-                          className="ml-2 text-red-400 hover:text-red-600"
-                        >
-                          ×
-                        </button>
-                      </Badge>
-                    ))}
-                  </div>
-                  <Input
-                    placeholder="Add service area and press Enter..."
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        const input = e.target as HTMLInputElement;
-                        const area = input.value.trim();
-                        if (area && !currentProfile.workingAreas?.includes(area)) {
-                          const newAreas = [...(currentProfile.workingAreas || []), area];
-                          form.setValue('workingAreas', newAreas);
-                          input.value = '';
-                        }
-                      }
-                    }}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+
 
             {/* Save Button */}
             <div className="flex gap-4 pt-6">
@@ -780,7 +932,7 @@ export default function FreelancerProfile() {
         </Form>
       </div>
 
-      <Navigation />
+      <Navigation currentPage="profile" userRole="freelancer" />
     </div>
   );
 }

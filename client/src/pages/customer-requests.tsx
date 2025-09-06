@@ -65,17 +65,14 @@ export default function CustomerRequests() {
   }
 
   return (
-    <div className="min-h-screen pb-20 bg-background text-foreground">
-      {/* Status Bar */}
-      <div className="status-bar">
-        <span>9:41 AM</span>
-        <div className="flex space-x-1">
-          <i className="fas fa-signal"></i>
-          <i className="fas fa-wifi"></i>
-          <i className="fas fa-battery-three-quarters"></i>
-        </div>
+    <div className="min-h-screen pb-24 bg-background text-foreground">
+      {/* Company Logo/Header */}
+      <div className="bg-gradient-purple py-4 px-6">
+        <h1 className="text-3xl font-bold text-white text-center tracking-tight">
+          Freelancer Connect
+        </h1>
       </div>
-
+      
       {/* Header */}
       <div className="bg-gradient-purple text-white p-6">
         <div className="flex items-center justify-between mb-6">
@@ -175,11 +172,11 @@ export default function CustomerRequests() {
                   <div className="bg-blue-50 rounded-lg p-3 mb-3">
                     <div className="flex items-center space-x-3">
                       <div className="w-10 h-10 bg-gradient-purple rounded-full flex items-center justify-center text-white font-semibold">
-                        {lead.acceptedByFreelancer.user.firstName?.[0] || '?'}
+                        {lead.acceptedByFreelancer.fullName?.[0] || '?'}
                       </div>
                       <div>
                         <p className="font-medium text-sm">
-                          Accepted by {lead.acceptedByFreelancer.user.firstName} {lead.acceptedByFreelancer.user.lastName}
+                          Accepted by {lead.acceptedByFreelancer.fullName}
                         </p>
                         <p className="text-xs text-gray-600">
                           {lead.acceptedByFreelancer.user.email}
@@ -230,7 +227,7 @@ export default function CustomerRequests() {
       </div>
 
       {/* Bottom Navigation */}
-      <Navigation currentPage="requests" userRole="customer" />
+      <Navigation currentPage="leads" userRole="customer" />
     </div>
   );
 }

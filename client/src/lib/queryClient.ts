@@ -1,4 +1,5 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { auth } from "./firebase";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -12,10 +13,37 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
+  // Get Firebase auth token and user
+  let authToken = '';
+  let firebaseUser = null;
+  try {
+    const user = auth.currentUser;
+    if (user) {
+      authToken = await user.getIdToken();
+      firebaseUser = user;
+    }
+  } catch (error) {
+    console.warn('Failed to get auth token:', error);
+  }
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  // Add authorization header if we have a token
+  if (authToken) {
+    headers["Authorization"] = `Bearer ${authToken}`;
+  }
+
+  // Add Firebase user ID header for better authentication
+  if (firebaseUser) {
+    headers["X-Firebase-User-ID"] = firebaseUser.uid;
+  }
+
   const res = await fetch(url, {
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
-    body: data ? JSON.stringify(data) : undefined,
+    headers,
+    body: (method === 'GET' || method === 'HEAD') ? undefined : (data ? JSON.stringify(data) : undefined),
     credentials: "include",
   });
 
@@ -29,7 +57,31 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
+    // Get Firebase auth token and user
+    let authToken = '';
+    let firebaseUser = null;
+    try {
+      const user = auth.currentUser;
+      if (user) {
+        authToken = await user.getIdToken();
+        firebaseUser = user;
+      }
+    } catch (error) {
+      console.warn('Failed to get auth token:', error);
+    }
+
+    const headers: Record<string, string> = {};
+    if (authToken) {
+      headers["Authorization"] = `Bearer ${authToken}`;
+    }
+
+    // Add Firebase user ID header for better authentication
+    if (firebaseUser) {
+      headers["X-Firebase-User-ID"] = firebaseUser.uid;
+    }
+
     const res = await fetch(queryKey.join("/") as string, {
+      headers,
       credentials: "include",
     });
 
@@ -44,7 +96,7 @@ export const getQueryFn: <T>(options: {
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      queryFn: getQueryFn({ on401: "throw" }),
+      queryFn: getQueryFn({ on401: "returnNull" }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
       staleTime: Infinity,
