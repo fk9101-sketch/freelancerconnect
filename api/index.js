@@ -15,12 +15,13 @@ app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 app.get('/health', (req, res) => {
   res.status(200).json({ 
     success: true,
-    message: 'Server is running - CommonJS Fixed',
+    message: 'Server is running - CommonJS Fixed - Cache Cleared',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'production',
     moduleType: 'CommonJS',
-    version: '3.0.0',
-    handler: 'api/index.js'
+    version: '4.0.0',
+    handler: 'api/index.js',
+    status: 'FINAL_FIX_APPLIED'
   });
 });
 
