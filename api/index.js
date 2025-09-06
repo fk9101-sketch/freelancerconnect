@@ -1,28 +1,18 @@
 const express = require('express');
-const path = require('path');
-const fs = require('fs');
-
 const app = express();
 
-// Middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: false, limit: '10mb' }));
+app.use(express.json());
 
-// Health check endpoint
 app.get('/health', (req, res) => {
-  res.status(200).json({ 
+  res.json({ 
     success: true,
-    message: 'Server is running - Vercel Build Fixed',
+    message: 'SINGLE SHOT FIX - Server running',
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'production',
-    moduleType: 'CommonJS',
-    version: '5.0.0',
-    handler: 'api/index.js',
-    status: 'SINGLE_SHOT_FIX_APPLIED'
+    version: '6.0.0',
+    status: 'FINAL_OVERHAUL_COMPLETE'
   });
 });
 
-// API routes placeholder
 app.use('/api/*', (req, res) => {
   res.status(404).json({ 
     success: false,
@@ -30,5 +20,4 @@ app.use('/api/*', (req, res) => {
   });
 });
 
-// Export for Vercel
 module.exports = app;
