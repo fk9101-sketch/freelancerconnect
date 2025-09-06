@@ -14,36 +14,37 @@ app.get('/health', (req, res) => {
     success: true,
     message: 'Server is running',
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV,
-    nodeVersion: process.version
+    environment: process.env.NODE_ENV
   });
 });
 
-// Serve static files from dist/public
-const distPath = path.join(__dirname, '..', 'dist', 'public');
+// Serve static files - try multiple possible paths
+const possiblePaths = [
+  path.join(__dirname, '..', 'dist', 'public'),
+  path.join(__dirname, '..', 'public'),
+  path.join(process.cwd(), 'dist', 'public'),
+  path.join(process.cwd(), 'public')
+];
 
-console.log(`Looking for static files in: ${distPath}`);
-console.log(`Current working directory: ${process.cwd()}`);
-console.log(`__dirname: ${__dirname}`);
-
-// Check if dist directory exists
-const distDir = path.join(__dirname, '..', 'dist');
-if (!fs.existsSync(distDir)) {
-  console.error(`Dist directory not found: ${distDir}`);
-  console.log('Available directories:', fs.readdirSync(path.join(__dirname, '..')));
+let staticPath = null;
+for (const testPath of possiblePaths) {
+  if (fs.existsSync(testPath)) {
+    staticPath = testPath;
+    console.log(`Found static files at: ${testPath}`);
+    break;
+  }
 }
 
-if (fs.existsSync(distPath)) {
-  console.log(`Serving static files from: ${distPath}`);
-  app.use(express.static(distPath));
+if (staticPath) {
+  app.use(express.static(staticPath));
+  console.log(`Serving static files from: ${staticPath}`);
 } else {
-  console.error(`Build directory not found: ${distPath}`);
-  console.log('Available files in dist:', fs.existsSync(distDir) ? fs.readdirSync(distDir) : 'dist directory does not exist');
+  console.error('No static files found in any expected location');
+  console.log('Searched paths:', possiblePaths);
 }
 
 // API routes placeholder
 app.use('/api/*', (req, res) => {
-  console.log(`API 404: ${req.method} ${req.path}`);
   res.status(404).json({ 
     success: false,
     message: `API endpoint not found: ${req.method} ${req.path}` 
@@ -52,18 +53,33 @@ app.use('/api/*', (req, res) => {
 
 // Serve React app for all other routes
 app.use('*', (req, res) => {
-  console.log(`Serving index.html for route: ${req.originalUrl}`);
-  const indexPath = path.join(distPath, 'index.html');
-  
-  if (fs.existsSync(indexPath)) {
-    res.sendFile(indexPath);
-  } else {
-    res.status(404).json({ 
-      success: false,
-      message: 'Application not built properly',
-      path: indexPath
-    });
+  if (staticPath) {
+    const indexPath = path.join(staticPath, 'index.html');
+    if (fs.existsSync(indexPath)) {
+      res.sendFile(indexPath);
+      return;
+    }
   }
+  
+  // Fallback response
+  res.status(200).send(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>HireLocal</title>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
+    <body>
+      <div id="root">
+        <h1>HireLocal - Freelancer Connect</h1>
+        <p>Application is loading...</p>
+        <p>If you see this message, the static files may not be built correctly.</p>
+        <p>Health check: <a href="/health">/health</a></p>
+      </div>
+    </body>
+    </html>
+  `);
 });
 
 // Export for Vercel
