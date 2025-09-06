@@ -95,9 +95,10 @@ app.use((req, res, next) => {
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
+  if (process.env.NODE_ENV === "development") {
     await setupVite(app, server);
   } else {
+    console.log("Setting up static file serving for production");
     serveStatic(app);
   }
 
@@ -109,8 +110,15 @@ app.use((req, res, next) => {
   console.log(`Environment: ${process.env.NODE_ENV}`);
   console.log(`App environment: ${app.get("env")}`);
   console.log(`Starting server on port ${port}`);
+  
   server.listen(port, '0.0.0.0', () => {
     log(`serving on port ${port}`);
     console.log(`Server is running on http://localhost:${port}`);
+    console.log(`Health check available at http://localhost:${port}/health`);
+  });
+
+  server.on('error', (err) => {
+    console.error('Server error:', err);
+    process.exit(1);
   });
 })();
