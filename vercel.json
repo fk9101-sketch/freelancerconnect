@@ -9,15 +9,15 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/api/index.js"
+      "dest": "/dist/index.js"
     },
     {
       "src": "/(.*)",
-      "dest": "/api/index.js"
+      "dest": "/dist/index.js"
     }
   ],
   "functions": {
-    "api/index.js": {
+    "dist/index.js": {
       "maxDuration": 30
     }
   },
