@@ -17,7 +17,8 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:test": "node test-db-connection.js",
-    "deploy": "npm run build && npm run start"
+    "deploy": "npm run build && npm run start",
+    "build:vercel": "npm run build"
   },
   "dependencies": {
     "@firebase/app": "^0.14.1",
