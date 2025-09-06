@@ -60,8 +60,19 @@ app.use((req, res, next) => {
   
   const server = await registerRoutes(app);
 
+  // Health check endpoint
+  app.get('/health', (req: Request, res: Response) => {
+    res.status(200).json({ 
+      success: true,
+      message: 'Server is running',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV
+    });
+  });
+
   // 404 handler for API routes
   app.use('/api/*', (req: Request, res: Response) => {
+    console.log(`API 404: ${req.method} ${req.path}`);
     res.status(404).json({ 
       success: false,
       message: `API endpoint not found: ${req.method} ${req.path}` 
