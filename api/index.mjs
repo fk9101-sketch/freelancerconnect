@@ -27,9 +27,10 @@ app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 app.get('/health', (req, res) => {
   res.status(200).json({ 
     success: true,
-    message: 'Server is running',
+    message: 'Server is running - ES Module Fixed',
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV
+    environment: process.env.NODE_ENV,
+    moduleType: 'ES Module'
   });
 });
 
