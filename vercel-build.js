@@ -58,9 +58,9 @@ try {
   }
   
   // Copy the API handler if it doesn't exist
-  if (!fs.existsSync('api/index.mjs')) {
+  if (!fs.existsSync('api/handler.mjs')) {
     console.log('API handler not found, creating placeholder...');
-    fs.writeFileSync('api/index.mjs', `import express from 'express';
+    fs.writeFileSync('api/handler.mjs', `import express from 'express';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';

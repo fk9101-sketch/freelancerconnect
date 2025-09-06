@@ -13,14 +13,14 @@
       }
     },
     {
-      "src": "api/index.mjs",
+      "src": "api/handler.mjs",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/api/index.mjs"
+      "dest": "/api/handler.mjs"
     },
     {
       "src": "/(.*)",
