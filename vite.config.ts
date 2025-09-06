@@ -44,4 +44,8 @@ export default defineConfig({
       ignored: ['**/node_modules/**', '**/dist/**']
     }
   },
+  // Add this for Vercel detection
+  define: {
+    __VITE_APP__: JSON.stringify(true)
+  }
 });
