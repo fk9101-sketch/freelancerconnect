@@ -14,7 +14,8 @@ app.get('/health', (req, res) => {
     success: true,
     message: 'Server is running',
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV
+    environment: process.env.NODE_ENV,
+    nodeVersion: process.version
   });
 });
 
@@ -22,12 +23,22 @@ app.get('/health', (req, res) => {
 const distPath = path.join(__dirname, '..', 'dist', 'public');
 
 console.log(`Looking for static files in: ${distPath}`);
+console.log(`Current working directory: ${process.cwd()}`);
+console.log(`__dirname: ${__dirname}`);
+
+// Check if dist directory exists
+const distDir = path.join(__dirname, '..', 'dist');
+if (!fs.existsSync(distDir)) {
+  console.error(`Dist directory not found: ${distDir}`);
+  console.log('Available directories:', fs.readdirSync(path.join(__dirname, '..')));
+}
 
 if (fs.existsSync(distPath)) {
   console.log(`Serving static files from: ${distPath}`);
   app.use(express.static(distPath));
 } else {
   console.error(`Build directory not found: ${distPath}`);
+  console.log('Available files in dist:', fs.existsSync(distDir) ? fs.readdirSync(distDir) : 'dist directory does not exist');
 }
 
 // API routes placeholder
