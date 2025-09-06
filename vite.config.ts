@@ -27,6 +27,12 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    rollupOptions: {
+      external: (id) => {
+        // Don't bundle node modules for server-side code
+        return id.includes('node_modules');
+      }
+    }
   },
   server: {
     fs: {
