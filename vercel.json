@@ -6,6 +6,13 @@
   "framework": "vite",
   "builds": [
     {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist/public"
+      }
+    },
+    {
       "src": "api/index.mjs",
       "use": "@vercel/node"
     }
@@ -17,7 +24,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/api/index.mjs"
+      "dest": "/index.html"
     }
   ],
   "env": {
