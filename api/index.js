@@ -18,7 +18,7 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Serve static files
+// Serve static files from dist/public
 const distPath = path.join(__dirname, '..', 'dist', 'public');
 
 console.log(`Looking for static files in: ${distPath}`);
@@ -49,7 +49,8 @@ app.use('*', (req, res) => {
   } else {
     res.status(404).json({ 
       success: false,
-      message: 'Application not built properly' 
+      message: 'Application not built properly',
+      path: indexPath
     });
   }
 });
