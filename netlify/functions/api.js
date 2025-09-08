@@ -1,8 +1,8 @@
 const { createClient } = require('@neondatabase/serverless');
 
-// Initialize Neon client
+// Initialize Neon client with the exact connection string from your Neon dashboard
 const neon = createClient({
-  connectionString: process.env.DATABASE_URL || process.env.NEON_DATABASE_URL
+  connectionString: process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_1U4p0odrCNbP@ep-plain-dew-a1i6qgwj-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require'
 });
 
 exports.handler = async (event, context) => {
