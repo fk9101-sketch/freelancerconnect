@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development tsx server/index.ts",
     "dev:win": "cross-env NODE_ENV=development tsx server/index.ts",
-    "build": "node build.js",
+    "build": "vite build && node post-build.js",
+    "build:static": "node build.js",
     "netlify-build": "node netlify-build.js",
     "start": "cross-env NODE_ENV=production node dist/index.js",
     "preview": "npm run build && npm run start",

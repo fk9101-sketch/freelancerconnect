@@ -1,0 +1,28 @@
+# Ignore server-side files for static deployment
+server/
+migrations/
+*.db
+*.sqlite
+*.sqlite3
+
+# Ignore development files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Ignore build artifacts that aren't needed
+node_modules/
+.git/
+.gitignore
+
+# Ignore database and server files
+drizzle.config.ts
+*.mjs
+*.js
+!post-build.js
+!build.js
+!netlify-build.js
+
+# Keep only the dist folder for deployment
