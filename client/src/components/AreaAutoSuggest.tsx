@@ -117,6 +117,14 @@ export function AreaAutoSuggest({
 
     setIsLoading(true);
     
+    // Use fallback data immediately for now
+    console.log('Using fallback areas data for query:', query);
+    const fallbackSuggestions = searchAreasFallback(query, 10);
+    setSuggestions(fallbackSuggestions);
+    setShowSuggestions(fallbackSuggestions.length > 0);
+    setIsLoading(false);
+    
+    // Try API call in background (optional)
     try {
       const params = new URLSearchParams({ query });
       if (userLocation) {
@@ -128,27 +136,17 @@ export function AreaAutoSuggest({
       
       const response = await fetch(`/api/areas/search?${params}`);
       
-      if (!response.ok) {
-        throw new Error(`Failed to fetch suggestions: ${response.status} ${response.statusText}`);
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Received API suggestions:', data);
+        
+        // Update with API data if available
+        setSuggestions(data);
+        setShowSuggestions(data.length > 0);
       }
-
-      const data = await response.json();
-      console.log('Received suggestions:', data);
-      
-      setSuggestions(data);
-      setShowSuggestions(data.length > 0);
     } catch (error) {
-      console.error('Error fetching area suggestions:', error);
-      console.log('Using fallback areas data');
-      
-      // Use fallback data when API fails
-      const fallbackSuggestions = searchAreasFallback(query, 10);
-      setSuggestions(fallbackSuggestions);
-      setShowSuggestions(fallbackSuggestions.length > 0);
-      
-      // Don't show error toast, just use fallback silently
-    } finally {
-      setIsLoading(false);
+      console.error('API call failed, using fallback:', error);
+      // Fallback data is already set above
     }
   }, [userLocation]);
 

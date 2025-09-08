@@ -172,10 +172,11 @@ exports.handler = async (event, context) => {
 
       try {
         // Try to get areas from database first
+        const searchPattern = `%${query}%`;
         const result = await neon.sql`
           SELECT name, city, state, country 
           FROM areas 
-          WHERE LOWER(name) LIKE LOWER(${'%' + query + '%'}) 
+          WHERE LOWER(name) LIKE LOWER(${searchPattern}) 
           AND is_active = true 
           ORDER BY name 
           LIMIT 10

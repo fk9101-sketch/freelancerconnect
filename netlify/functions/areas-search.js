@@ -72,29 +72,30 @@ exports.handler = async (event, context) => {
 
     let suggestions = [];
 
-    try {
-      // Try to get areas from database first
-      const result = await neon.sql`
-        SELECT name, city, state, country 
-        FROM areas 
-        WHERE LOWER(name) LIKE LOWER(${'%' + query + '%'}) 
-        AND is_active = true 
-        ORDER BY name 
-        LIMIT 10
-      `;
-      
-      suggestions = result.map(area => ({
-        name: area.name,
-        distance_km: undefined,
-        meta: `${area.city} • ${area.state}`
-      }));
-      
-      console.log('Database results:', suggestions.length);
-    } catch (dbError) {
-      console.warn("Database not accessible, using fallback areas data:", dbError.message);
-      suggestions = searchAreasFallback(query, 10);
-      console.log('Fallback results:', suggestions.length);
-    }
+      try {
+        // Try to get areas from database first
+        const searchPattern = `%${query}%`;
+        const result = await neon.sql`
+          SELECT name, city, state, country 
+          FROM areas 
+          WHERE LOWER(name) LIKE LOWER(${searchPattern}) 
+          AND is_active = true 
+          ORDER BY name 
+          LIMIT 10
+        `;
+        
+        suggestions = result.map(area => ({
+          name: area.name,
+          distance_km: undefined,
+          meta: `${area.city} • ${area.state}`
+        }));
+        
+        console.log('Database results:', suggestions.length);
+      } catch (dbError) {
+        console.warn("Database not accessible, using fallback areas data:", dbError.message);
+        suggestions = searchAreasFallback(query, 10);
+        console.log('Fallback results:', suggestions.length);
+      }
 
     return {
       statusCode: 200,
