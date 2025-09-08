@@ -309,10 +309,13 @@ exports.handler = async (event, context) => {
 
     // Auth signup endpoint
     if (path === '/api/auth/signup' && method === 'POST') {
+      console.log('Signup request received:', { email: body.email, role: body.role });
+      
       const { email, password, fullName, area, role, phone } = body;
       
       // Validate required fields
       if (!email || !password || !fullName || !area || !role) {
+        console.log('Validation failed: missing required fields', { email, fullName, area, role });
         return {
           statusCode: 400,
           headers,
@@ -340,9 +343,13 @@ exports.handler = async (event, context) => {
       }
 
       try {
+        console.log('Checking if user exists...');
         // Check if user already exists
         const existingUser = await neon.sql`SELECT id FROM users WHERE email = ${email}`;
+        console.log('Existing user check result:', existingUser.length);
+        
         if (existingUser.length > 0) {
+          console.log('User already exists');
           return {
             statusCode: 400,
             headers,
@@ -350,6 +357,7 @@ exports.handler = async (event, context) => {
           };
         }
 
+        console.log('Creating new user...');
         // Create user
         const result = await neon.sql`
           INSERT INTO users (email, first_name, last_name, area, role, phone, created_at)
@@ -357,6 +365,7 @@ exports.handler = async (event, context) => {
           RETURNING *
         `;
         
+        console.log('User created successfully:', result[0]?.id);
         return {
           statusCode: 201,
           headers,
@@ -367,7 +376,7 @@ exports.handler = async (event, context) => {
         return {
           statusCode: 500,
           headers,
-          body: JSON.stringify({ message: "Failed to create user" })
+          body: JSON.stringify({ message: "Failed to create user", error: dbError.message })
         };
       }
     }

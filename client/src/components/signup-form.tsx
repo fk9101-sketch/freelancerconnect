@@ -145,6 +145,8 @@ export function SignupForm({ role, onBack }: SignupFormProps) {
       
       // Try to extract error message from server response
       if (error.message) {
+        console.log('Error message:', error.message);
+        
         // Check if it's a server error response (format: "400: {"message": "..."}")
         const serverErrorMatch = error.message.match(/^\d+:\s*\{.*"message":\s*"([^"]+)".*\}$/);
         if (serverErrorMatch) {
@@ -163,6 +165,8 @@ export function SignupForm({ role, onBack }: SignupFormProps) {
           errorMessage = 'Please enter a valid email address.';
         } else if (error.message.includes('All fields are required')) {
           errorMessage = 'Please fill in all required fields.';
+        } else if (error.message.includes('Failed to fetch')) {
+          errorMessage = 'Unable to connect to server. Please check your internet connection and try again.';
         } else {
           errorMessage = error.message;
         }

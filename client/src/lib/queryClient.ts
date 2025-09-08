@@ -52,9 +52,11 @@ export async function apiRequest(
   } else if (import.meta.env.PROD) {
     // For production, use Netlify Functions
     fullUrl = `${API_BASE_URL}/api${url.startsWith('/') ? url : '/' + url}`;
+    console.log('Production API call:', fullUrl);
   } else {
     // For development, use Express server
     fullUrl = `${API_BASE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+    console.log('Development API call:', fullUrl);
   }
   
   const res = await fetch(fullUrl, {

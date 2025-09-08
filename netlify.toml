@@ -33,6 +33,31 @@
   to = "/.netlify/functions/api?path=/api/categories/search"
   status = 200
 
+[[redirects]]
+  from = "/api/auth/signup"
+  to = "/.netlify/functions/api?path=/api/auth/signup"
+  status = 200
+
+[[redirects]]
+  from = "/api/auth/freelancer-signup"
+  to = "/.netlify/functions/api?path=/api/auth/freelancer-signup"
+  status = 200
+
+[[redirects]]
+  from = "/api/users"
+  to = "/.netlify/functions/api?path=/api/users"
+  status = 200
+
+[[redirects]]
+  from = "/api/leads"
+  to = "/.netlify/functions/api?path=/api/leads"
+  status = 200
+
+[[redirects]]
+  from = "/api/freelancers"
+  to = "/.netlify/functions/api?path=/api/freelancers"
+  status = 200
+
 
 # Redirect rules for SPA - this is critical
 [[redirects]]
