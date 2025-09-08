@@ -3,8 +3,12 @@ const fs = require('fs');
 const path = require('path');
 
 // Initialize Neon client
+console.log('🔍 Environment check:');
+console.log('DATABASE_URL:', process.env.DATABASE_URL ? 'Set' : 'Not set');
+console.log('NEON_DATABASE_URL:', process.env.NEON_DATABASE_URL ? 'Set' : 'Not set');
+
 const neon = createClient({
-  connectionString: process.env.DATABASE_URL
+  connectionString: process.env.DATABASE_URL || process.env.NEON_DATABASE_URL
 });
 
 // Fallback areas data
@@ -72,6 +76,35 @@ exports.handler = async (event, context) => {
         headers,
         body: JSON.stringify({ status: 'ok', timestamp: new Date().toISOString() })
       };
+    }
+
+    // Database test endpoint
+    if (path === '/api/test-db' && method === 'GET') {
+      try {
+        console.log('Testing database connection...');
+        const result = await neon.sql`SELECT NOW() as current_time, version() as postgres_version`;
+        console.log('Database test result:', result);
+        return {
+          statusCode: 200,
+          headers,
+          body: JSON.stringify({ 
+            status: 'Database connected', 
+            result: result[0],
+            timestamp: new Date().toISOString()
+          })
+        };
+      } catch (dbError) {
+        console.error('Database test failed:', dbError);
+        return {
+          statusCode: 500,
+          headers,
+          body: JSON.stringify({ 
+            error: 'Database connection failed', 
+            message: dbError.message,
+            timestamp: new Date().toISOString()
+          })
+        };
+      }
     }
 
     // Simple test endpoint

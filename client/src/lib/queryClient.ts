@@ -51,7 +51,7 @@ export async function apiRequest(
     fullUrl = url;
   } else if (import.meta.env.PROD) {
     // For production, use Netlify Functions
-    fullUrl = `${API_BASE_URL}/api${url.startsWith('/') ? url : '/' + url}`;
+    fullUrl = `${API_BASE_URL}${url.startsWith('/') ? url : '/' + url}`;
     console.log('Production API call:', fullUrl);
   } else {
     // For development, use Express server

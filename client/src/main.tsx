@@ -5,12 +5,23 @@ import "./index.css";
 // Add error handling to prevent white screens
 window.addEventListener('error', (event) => {
   console.error('Global error:', event.error);
+  console.error('Error details:', {
+    message: event.message,
+    filename: event.filename,
+    lineno: event.lineno,
+    colno: event.colno,
+    error: event.error
+  });
   // Prevent default error handling to avoid white screen
   event.preventDefault();
 });
 
 window.addEventListener('unhandledrejection', (event) => {
   console.error('Unhandled promise rejection:', event.reason);
+  console.error('Promise rejection details:', {
+    reason: event.reason,
+    promise: event.promise
+  });
   // Prevent default error handling to avoid white screen
   event.preventDefault();
 });
