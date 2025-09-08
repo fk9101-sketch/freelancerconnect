@@ -3,13 +3,13 @@ import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, RecaptchaVerifie
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyC4n_Cum0CvMyrIIWiehMltWO92MYnCvgw",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "freelancer-connect-899a8.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "freelancer-connect-899a8",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "freelancer-connect-899a8.firebasestorage.app",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "224541104230",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:224541104230:web:62bb08bdd9ae55872a35a7",
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-GXMBYGFZPF"
+  apiKey: "AIzaSyC4n_Cum0CvMyrIIWiehMltWO92MYnCvgw",
+  authDomain: "freelancer-connect-899a8.firebaseapp.com",
+  projectId: "freelancer-connect-899a8",
+  storageBucket: "freelancer-connect-899a8.firebasestorage.app",
+  messagingSenderId: "224541104230",
+  appId: "1:224541104230:web:62bb08bdd9ae55872a35a7",
+  measurementId: "G-GXMBYGFZPF"
 };
 
 // Initialize Firebase
