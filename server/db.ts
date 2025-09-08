@@ -3,9 +3,18 @@ import pkg from 'pg';
 const { Pool } = pkg;
 import * as schema from "@shared/schema";
 import dotenv from 'dotenv';
+import path from 'path';
 
-// Load environment variables
-dotenv.config();
+// Load environment variables from the project root
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+
+// Debug environment variables
+console.log('🔍 Environment variables loaded:');
+console.log('DATABASE_URL:', process.env.DATABASE_URL ? 'Set' : 'Not set');
+console.log('NEON_DATABASE_URL:', process.env.NEON_DATABASE_URL ? 'Set' : 'Not set');
+console.log('NEON_HOST:', process.env.NEON_HOST || 'Not set');
+console.log('NEON_DATABASE:', process.env.NEON_DATABASE || 'Not set');
+console.log('NEON_USER:', process.env.NEON_USER || 'Not set');
 
 // Create PostgreSQL database connection
 const pool = new Pool({

@@ -4,9 +4,10 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { initializeDatabase } from "./init-db";
 import dotenv from "dotenv";
+import path from "path";
 
-// Load environment variables
-dotenv.config();
+// Load environment variables from the project root
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
 const app = express();
 app.use(express.json());

@@ -4,9 +4,10 @@ const { Pool } = pkg;
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import * as schema from '@shared/schema';
 import dotenv from 'dotenv';
+import path from 'path';
 
-// Load environment variables
-dotenv.config();
+// Load environment variables from the project root
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
 // Database connection
 const pool = new Pool({
