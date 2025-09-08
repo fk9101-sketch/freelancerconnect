@@ -56,7 +56,7 @@ export default defineConfig(({ mode }) => ({
     },
     proxy: {
       '/api': {
-        target: 'https://myprojectfreelanace.netlify.app',
+        target: 'https://mythefreelance.netlify.app',
         changeOrigin: true,
         secure: true,
       }

@@ -3,7 +3,7 @@ import { auth } from "./firebase";
 
 // API base URL configuration
 const API_BASE_URL = import.meta.env.PROD 
-  ? 'https://myprojectfreelanace.netlify.app'
+  ? 'https://mythefreelance.netlify.app'
   : 'http://localhost:5001';
 
 async function throwIfResNotOk(res: Response) {

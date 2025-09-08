@@ -1,6 +1,6 @@
 // API service for communicating with Express server
 const API_BASE_URL = import.meta.env.PROD 
-  ? 'https://myprojectfreelanace.netlify.app/api'
+  ? 'https://mythefreelance.netlify.app/api'
   : 'http://localhost:5001/api';
 
 export interface User {

@@ -14,7 +14,7 @@ app.use(express.static(path.join(__dirname, 'client')));
 
 // Proxy API calls to the production server
 app.use('/api', createProxyMiddleware({
-  target: 'https://myprojectfreelanace.netlify.app',
+  target: 'https://mythefreelance.netlify.app',
   changeOrigin: true,
   logLevel: 'info',
   secure: true,
@@ -30,6 +30,6 @@ app.get('*', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`🚀 Development server running on http://localhost:${PORT}`);
-  console.log(`📡 API calls will be proxied to https://myprojectfreelanace.netlify.app`);
+  console.log(`📡 API calls will be proxied to https://mythefreelance.netlify.app`);
   console.log(`🌐 Open your browser and go to: http://localhost:${PORT}`);
 });
