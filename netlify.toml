@@ -11,7 +11,7 @@
 [build.environment]
   NODE_VERSION = "18"
 
-# Redirect rules for SPA - handle all routes
+# Redirect rules for SPA - this is the most important part
 [[redirects]]
   from = "/*"
   to = "/index.html"
