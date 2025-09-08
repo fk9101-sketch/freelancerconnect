@@ -1,9 +1,9 @@
-import { neon } from '@neondatabase/serverless';
+const { neon } = require('@neondatabase/serverless');
 
 // Initialize Neon client
 const sql = neon(process.env.DATABASE_URL);
 
-export const handler = async (event, context) => {
+exports.handler = async (event, context) => {
   // Handle CORS
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -20,12 +20,18 @@ export const handler = async (event, context) => {
   }
 
   try {
+    console.log('Categories function called');
+    console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
+    
     try {
       const result = await sql`SELECT * FROM categories WHERE is_active = true ORDER BY name`;
       console.log('Database categories count:', result.length);
       return {
         statusCode: 200,
-        headers,
+        headers: {
+          ...headers,
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify(result)
       };
     } catch (dbError) {
@@ -43,7 +49,10 @@ export const handler = async (event, context) => {
       console.log('Fallback categories count:', fallbackCategories.length);
       return {
         statusCode: 200,
-        headers,
+        headers: {
+          ...headers,
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify(fallbackCategories)
       };
     }
@@ -51,8 +60,11 @@ export const handler = async (event, context) => {
     console.error('Categories error:', error);
     return {
       statusCode: 500,
-      headers,
-      body: JSON.stringify({ error: 'Internal server error' })
+      headers: {
+        ...headers,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ error: 'Internal server error', details: error.message })
     };
   }
 };
