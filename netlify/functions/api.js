@@ -307,6 +307,71 @@ exports.handler = async (event, context) => {
       };
     }
 
+    // Auth signup endpoint
+    if (path === '/api/auth/signup' && method === 'POST') {
+      const { email, password, fullName, area, role, phone } = body;
+      
+      // Validate required fields
+      if (!email || !password || !fullName || !area || !role) {
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({ message: "All fields are required" })
+        };
+      }
+
+      // Validate role
+      if (!['customer', 'freelancer'].includes(role)) {
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({ message: "Invalid role" })
+        };
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({ message: "Invalid email format" })
+        };
+      }
+
+      try {
+        // Check if user already exists
+        const existingUser = await neon.sql`SELECT id FROM users WHERE email = ${email}`;
+        if (existingUser.length > 0) {
+          return {
+            statusCode: 400,
+            headers,
+            body: JSON.stringify({ message: "User with this email already exists" })
+          };
+        }
+
+        // Create user
+        const result = await neon.sql`
+          INSERT INTO users (email, first_name, last_name, area, role, phone, created_at)
+          VALUES (${email}, ${fullName.split(' ')[0] || ''}, ${fullName.split(' ').slice(1).join(' ') || ''}, ${area}, ${role}, ${phone || ''}, NOW())
+          RETURNING *
+        `;
+        
+        return {
+          statusCode: 201,
+          headers,
+          body: JSON.stringify({ success: true, user: result[0] })
+        };
+      } catch (dbError) {
+        console.error('Database error during signup:', dbError);
+        return {
+          statusCode: 500,
+          headers,
+          body: JSON.stringify({ message: "Failed to create user" })
+        };
+      }
+    }
+
     // Default response
     return {
       statusCode: 404,

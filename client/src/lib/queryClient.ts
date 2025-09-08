@@ -3,8 +3,8 @@ import { auth } from "./firebase";
 
 // API base URL configuration
 const API_BASE_URL = import.meta.env.PROD 
-  ? 'https://myprojectfreelanace.netlify.app/api'
-  : 'http://localhost:5001/api';
+  ? 'https://myprojectfreelanace.netlify.app/.netlify/functions'
+  : 'http://localhost:5001';
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -46,7 +46,16 @@ export async function apiRequest(
   }
 
   // Construct full URL
-  const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+  let fullUrl;
+  if (url.startsWith('http')) {
+    fullUrl = url;
+  } else if (import.meta.env.PROD) {
+    // For production, use Netlify Functions
+    fullUrl = `${API_BASE_URL}/api${url.startsWith('/') ? url : '/' + url}`;
+  } else {
+    // For development, use Express server
+    fullUrl = `${API_BASE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+  }
   
   const res = await fetch(fullUrl, {
     method,
