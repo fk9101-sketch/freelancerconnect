@@ -11,61 +11,38 @@
 # Functions configuration
 [functions]
   directory = "netlify/functions"
+  node_bundler = "esbuild"
 
-# API redirects - these must come before the SPA redirect
+# API redirects - Route all API calls to the main handler
 [[redirects]]
-  from = "/api/areas/search"
-  to = "/.netlify/functions/areas-search"
+  from = "/api/*"
+  to = "/.netlify/functions/api-handler?path=:splat"
   status = 200
 
+# Specific API redirects for better routing
 [[redirects]]
-  from = "/api/areas/all"
-  to = "/.netlify/functions/areas-all"
-  status = 200
-
-[[redirects]]
-  from = "/api/categories"
-  to = "/.netlify/functions/categories"
-  status = 200
-
-[[redirects]]
-  from = "/api/categories/search"
-  to = "/.netlify/functions/api?path=/api/categories/search"
-  status = 200
-
-[[redirects]]
-  from = "/api/auth/signup"
-  to = "/.netlify/functions/api?path=/api/auth/signup"
-  status = 200
-
-[[redirects]]
-  from = "/api/auth/freelancer-signup"
-  to = "/.netlify/functions/api?path=/api/auth/freelancer-signup"
-  status = 200
-
-[[redirects]]
-  from = "/api/users"
-  to = "/.netlify/functions/api?path=/api/users"
-  status = 200
-
-[[redirects]]
-  from = "/api/leads"
-  to = "/.netlify/functions/api?path=/api/leads"
-  status = 200
-
-[[redirects]]
-  from = "/api/freelancers"
-  to = "/.netlify/functions/api?path=/api/freelancers"
+  from = "/api/test"
+  to = "/.netlify/functions/api-handler?path=/api/test"
   status = 200
 
 [[redirects]]
   from = "/api/test-db"
-  to = "/.netlify/functions/api?path=/api/test-db"
+  to = "/.netlify/functions/api-handler?path=/api/test-db"
   status = 200
 
 [[redirects]]
-  from = "/api/test"
-  to = "/.netlify/functions/api?path=/api/test"
+  from = "/api/auth/signup"
+  to = "/.netlify/functions/api-handler?path=/api/auth/signup"
+  status = 200
+
+[[redirects]]
+  from = "/api/categories"
+  to = "/.netlify/functions/api-handler?path=/api/categories"
+  status = 200
+
+[[redirects]]
+  from = "/api/areas"
+  to = "/.netlify/functions/api-handler?path=/api/areas"
   status = 200
 
 
