@@ -1,21 +1,16 @@
 [build]
-  # Directory to change to before starting a build
-  base = "."
-  
-  # Directory that contains the deploy-ready HTML files and assets
-  publish = "dist/public"
-  
-  # Default build command
   command = "npm run build"
+  publish = "dist/public"
 
 [build.environment]
   NODE_VERSION = "18"
 
-# Redirect rules for SPA - this is the most important part
+# Redirect rules for SPA
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+  force = true
 
 # Headers for better performance and security
 [[headers]]
