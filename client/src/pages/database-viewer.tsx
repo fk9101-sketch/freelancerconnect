@@ -37,15 +37,15 @@ export default function DatabaseViewer() {
       setError(null);
 
       // Test API health first
-      const healthResponse = await fetch('/.netlify/functions/api/health');
+      const healthResponse = await fetch('/api/../health');
       if (!healthResponse.ok) {
         throw new Error('API is not responding');
       }
 
       // Fetch users and leads
       const [usersResponse, leadsResponse] = await Promise.all([
-        fetch('/.netlify/functions/api/users'),
-        fetch('/.netlify/functions/api/leads')
+        fetch('/api/users'),
+        fetch('/api/leads')
       ]);
 
       if (usersResponse.ok) {
@@ -234,7 +234,7 @@ export default function DatabaseViewer() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2 text-sm">
-              <p><strong>API Endpoint:</strong> /.netlify/functions/api/</p>
+              <p><strong>API Endpoint:</strong> /api/</p>
               <p><strong>Health Check:</strong> <span className="text-green-600">✓ Connected</span></p>
               <p><strong>Users Table:</strong> {users.length} records</p>
               <p><strong>Leads Table:</strong> {leads.length} records</p>

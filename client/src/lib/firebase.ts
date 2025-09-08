@@ -88,7 +88,7 @@ export const signUpWithEmail = async (email: string, password: string) => {
     if (user) {
       console.log("Saving user to database...");
       try {
-        const response = await fetch('/.netlify/functions/api/users', {
+        const response = await fetch('/api/users', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

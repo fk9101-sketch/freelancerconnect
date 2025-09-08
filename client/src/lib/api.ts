@@ -1,7 +1,7 @@
-// API service for communicating with Netlify Functions
+// API service for communicating with Express server
 const API_BASE_URL = import.meta.env.PROD 
-  ? 'https://myprojectfreelanace.netlify.app/.netlify/functions'
-  : 'http://localhost:8888/.netlify/functions';
+  ? 'https://myprojectfreelanace.netlify.app/api'
+  : 'http://localhost:5001/api';
 
 export interface User {
   id: string;
@@ -26,7 +26,7 @@ export interface Lead {
 export const api = {
   // User endpoints
   async createUser(userData: Omit<User, 'id' | 'created_at'>) {
-    const response = await fetch(`${API_BASE_URL}/api/users`, {
+    const response = await fetch(`${API_BASE_URL}/users`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(userData)
@@ -40,7 +40,7 @@ export const api = {
   },
 
   async getUsers(): Promise<User[]> {
-    const response = await fetch(`${API_BASE_URL}/api/users`);
+    const response = await fetch(`${API_BASE_URL}/users`);
     
     if (!response.ok) {
       throw new Error(`Failed to fetch users: ${response.statusText}`);
@@ -50,7 +50,7 @@ export const api = {
   },
 
   async getUser(userId: string): Promise<User | null> {
-    const response = await fetch(`${API_BASE_URL}/api/users/${userId}`);
+    const response = await fetch(`${API_BASE_URL}/users/${userId}`);
     
     if (!response.ok) {
       throw new Error(`Failed to fetch user: ${response.statusText}`);
@@ -61,7 +61,7 @@ export const api = {
 
   // Lead endpoints
   async createLead(leadData: Omit<Lead, 'id' | 'created_at'>) {
-    const response = await fetch(`${API_BASE_URL}/api/leads`, {
+    const response = await fetch(`${API_BASE_URL}/leads`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(leadData)
@@ -75,7 +75,7 @@ export const api = {
   },
 
   async getLeads(): Promise<Lead[]> {
-    const response = await fetch(`${API_BASE_URL}/api/leads`);
+    const response = await fetch(`${API_BASE_URL}/leads`);
     
     if (!response.ok) {
       throw new Error(`Failed to fetch leads: ${response.statusText}`);
@@ -87,7 +87,7 @@ export const api = {
   // Health check
   async healthCheck() {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/health`);
+      const response = await fetch(`${API_BASE_URL}/../health`);
       return response.ok;
     } catch (error) {
       console.error('Health check failed:', error);
