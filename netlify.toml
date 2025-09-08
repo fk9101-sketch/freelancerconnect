@@ -14,56 +14,46 @@
   node_bundler = "esbuild"
   external_node_modules = ["@neondatabase/serverless"]
 
-# API redirects - Route all API calls to the simple handler (temporary)
+# API redirects - Route all API calls to the main handler
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/api-simple?path=:splat"
+  to = "/.netlify/functions/api"
   status = 200
 
 # Specific API redirects for better routing
 [[redirects]]
   from = "/api/test"
-  to = "/.netlify/functions/api-simple?path=/api/test"
+  to = "/.netlify/functions/api"
   status = 200
 
 [[redirects]]
   from = "/api/test-db"
-  to = "/.netlify/functions/api-simple?path=/api/test-db"
+  to = "/.netlify/functions/api"
   status = 200
 
 [[redirects]]
   from = "/api/auth/signup"
-  to = "/.netlify/functions/api-simple?path=/api/auth/signup"
+  to = "/.netlify/functions/api"
   status = 200
 
 [[redirects]]
   from = "/api/categories"
-  to = "/.netlify/functions/api-simple?path=/api/categories"
+  to = "/.netlify/functions/api"
   status = 200
 
 [[redirects]]
   from = "/api/areas"
-  to = "/.netlify/functions/api-simple?path=/api/areas"
+  to = "/.netlify/functions/api"
   status = 200
 
 [[redirects]]
   from = "/api/freelancers"
-  to = "/.netlify/functions/api-simple?path=/api/freelancers"
+  to = "/.netlify/functions/api"
   status = 200
 
 [[redirects]]
   from = "/api/customer/profile"
-  to = "/.netlify/functions/api-simple?path=/api/customer/profile"
-  status = 200
-
-[[redirects]]
-  from = "/api/test-simple"
-  to = "/.netlify/functions/test-simple"
-  status = 200
-
-[[redirects]]
-  from = "/api/hello"
-  to = "/.netlify/functions/hello"
+  to = "/.netlify/functions/api"
   status = 200
 
 
