@@ -6,6 +6,7 @@
   NODE_VERSION = "18"
   NODE_OPTIONS = "--max-old-space-size=4096"
   CI = "false"
+  NPM_FLAGS = "--production=false"
 
 # Redirect rules for SPA - this is critical
 [[redirects]]
