@@ -12,6 +12,22 @@
 [functions]
   directory = "netlify/functions"
 
+# API redirects - these must come before the SPA redirect
+[[redirects]]
+  from = "/api/areas/search"
+  to = "/.netlify/functions/areas-search"
+  status = 200
+
+[[redirects]]
+  from = "/api/areas/all"
+  to = "/.netlify/functions/areas-all"
+  status = 200
+
+[[redirects]]
+  from = "/api/categories"
+  to = "/.netlify/functions/categories"
+  status = 200
+
 # Redirect rules for SPA - this is critical
 [[redirects]]
   from = "/*"
