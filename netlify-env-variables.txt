@@ -2,7 +2,7 @@
 # Copy these EXACTLY to your Netlify Dashboard → Site Settings → Environment Variables
 
 # Database Configuration
-DATABASE_URL=postgresql://neondb_owner:npg_1U4p0odrCNbP@ep-plain-dew-a1i6qgwj-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+DATABASE_URL=postgresql://neondb_owner:npg_1U4pOodrCNbP@ep-plain-dew-a1i6qgwj-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
 
 # Node Environment
 NODE_ENV=production

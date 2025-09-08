@@ -1,0 +1,5 @@
+[33m5c3a3a3[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m Fix Google Firebase authentication and Neon database integration
+[33ma977f8e[m feat: Complete PostgreSQL to Neon database migration
+[33ma0767a2[m ENV: Complete environment setup - Added .env files and comprehensive setup guide
+[33m634d368[m FEAT: Database integration + viewer - Added user saving to DB, created database viewer page, updated auth flow
+[33mc6ae9d1[m FIX: Google auth + Database setup - Hardcoded Firebase config, added Netlify functions, created API service

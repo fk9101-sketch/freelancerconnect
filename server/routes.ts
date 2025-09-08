@@ -841,8 +841,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Areas API for getting all areas (for dropdowns)
   app.get('/api/areas/all', async (req, res) => {
     try {
-      const areas = await storage.getAreas();
-      const areaNames = areas.map(area => area.name);
+      let areaNames = [];
+      
+      try {
+        // Try to get areas from database first
+        const areas = await storage.getAreas();
+        areaNames = areas.map(area => area.name);
+      } catch (dbError) {
+        console.warn("Database not accessible, using fallback areas data:", dbError.message);
+        
+        // Fallback to JSON file data
+        const { areasData } = await import('./fallback-areas.js');
+        areaNames = areasData;
+      }
+      
       res.json(areaNames);
     } catch (error) {
       console.error("Error fetching all areas:", error);
@@ -1097,14 +1109,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Query parameter must be at least 2 characters" });
       }
 
-      const areas = await storage.getAreasByQuery(query, 8);
+      let suggestions = [];
 
-      // Transform to match expected format
-      const suggestions = areas.map(area => ({
-        name: area.name,
-        distance_km: undefined as number | undefined,
-        meta: `${area.city} • ${area.state}`
-      }));
+      try {
+        // Try to get areas from database first
+        const areas = await storage.getAreasByQuery(query, 8);
+        suggestions = areas.map(area => ({
+          name: area.name,
+          distance_km: undefined as number | undefined,
+          meta: `${area.city} • ${area.state}`
+        }));
+      } catch (dbError) {
+        console.warn("Database not accessible, using fallback areas data:", dbError.message);
+        
+        // Fallback to JSON file data
+        const { searchAreasFallback } = await import('./fallback-areas.js');
+        suggestions = searchAreasFallback(query, 8);
+      }
 
       // If coordinates provided, calculate distances
       if (lat && lng) {
@@ -1135,14 +1156,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Query parameter must be at least 2 characters" });
       }
 
-      const areas = await storage.getAreasByQuery(query, 10);
+      let suggestions = [];
 
-      // Transform to match expected format
-      const suggestions = areas.map(area => ({
-        name: area.name,
-        distance_km: undefined as number | undefined,
-        meta: `${area.city} • ${area.state}`
-      }));
+      try {
+        // Try to get areas from database first
+        const areas = await storage.getAreasByQuery(query, 10);
+        suggestions = areas.map(area => ({
+          name: area.name,
+          distance_km: undefined as number | undefined,
+          meta: `${area.city} • ${area.state}`
+        }));
+      } catch (dbError) {
+        console.warn("Database not accessible, using fallback areas data:", dbError.message);
+        
+        // Fallback to JSON file data
+        const { searchAreasFallback } = await import('./fallback-areas.js');
+        suggestions = searchAreasFallback(query, 10);
+      }
 
       // If coordinates provided, calculate distances
       if (lat && lng) {
