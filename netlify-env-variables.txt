@@ -1,0 +1,32 @@
+# NETLIFY ENVIRONMENT VARIABLES
+# Copy these EXACTLY to your Netlify Dashboard → Site Settings → Environment Variables
+
+# Database Configuration
+DATABASE_URL=postgresql://neondb_owner:npg_1U4p0odrCNbP@ep-plain-dew-a1i6qgwj-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+
+# Node Environment
+NODE_ENV=production
+
+# Build Configuration
+NODE_OPTIONS=--max-old-space-size=4096
+CI=false
+NPM_FLAGS=--production=false
+
+# Firebase Configuration (Server-side)
+FIREBASE_API_KEY=AIzaSyC4n_Cum0CvMyrIIWiehMltWO92MYnCvgw
+FIREBASE_AUTH_DOMAIN=freelancer-connect-899a8.firebaseapp.com
+FIREBASE_PROJECT_ID=freelancer-connect-899a8
+FIREBASE_STORAGE_BUCKET=freelancer-connect-899a8.firebasestorage.app
+FIREBASE_MESSAGING_SENDER_ID=224541104230
+FIREBASE_APP_ID=1:224541104230:web:62bb08bdd9ae55872a35a7
+FIREBASE_MEASUREMENT_ID=G-GXMBYGFZPF
+
+# API Configuration
+API_BASE_URL=https://myprojectfreelanace.netlify.app/.netlify/functions
+
+# Razorpay Configuration (if needed)
+RAZORPAY_KEY_ID=your_razorpay_key_id
+RAZORPAY_KEY_SECRET=your_razorpay_key_secret
+
+# JWT Secret (if needed)
+JWT_SECRET=your_jwt_secret_key_here
