@@ -45,6 +45,11 @@
   to = "/.netlify/functions/api-handler?path=/api/areas"
   status = 200
 
+[[redirects]]
+  from = "/api/test-simple"
+  to = "/.netlify/functions/test-simple"
+  status = 200
+
 
 # Redirect rules for SPA - this is critical
 [[redirects]]
