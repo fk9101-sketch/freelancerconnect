@@ -251,6 +251,62 @@ exports.handler = async (event, context) => {
       }
     }
 
+    // Categories search API
+    if (path === '/api/categories/search' && method === 'GET') {
+      const { query } = event.queryStringParameters || {};
+      
+      console.log('Categories search request:', { query, queryStringParameters: event.queryStringParameters });
+      
+      if (!query || query.length < 2) {
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({ message: "Query parameter must be at least 2 characters" })
+        };
+      }
+
+      let suggestions = [];
+
+      try {
+        // Try to get categories from database first
+        const searchPattern = `%${query}%`;
+        const result = await neon.sql`
+          SELECT * FROM categories 
+          WHERE LOWER(name) LIKE LOWER(${searchPattern}) 
+          AND is_active = true 
+          ORDER BY name 
+          LIMIT 10
+        `;
+        
+        suggestions = result;
+        console.log('Database categories results:', suggestions.length);
+      } catch (dbError) {
+        console.warn("Database not accessible, using fallback categories:", dbError.message);
+        // Fallback categories
+        const fallbackCategories = [
+          { id: '1', name: 'Web Development', icon: '💻', color: '#3B82F6', isActive: true },
+          { id: '2', name: 'Mobile Development', icon: '📱', color: '#10B981', isActive: true },
+          { id: '3', name: 'Design', icon: '🎨', color: '#F59E0B', isActive: true },
+          { id: '4', name: 'Writing', icon: '✍️', color: '#8B5CF6', isActive: true },
+          { id: '5', name: 'Marketing', icon: '📈', color: '#EF4444', isActive: true },
+          { id: '6', name: 'Consulting', icon: '💼', color: '#06B6D4', isActive: true },
+          { id: '7', name: 'Other', icon: '🔧', color: '#6B7280', isActive: true }
+        ];
+        
+        const lowerQuery = query.toLowerCase();
+        suggestions = fallbackCategories.filter(category => 
+          category.name.toLowerCase().includes(lowerQuery)
+        );
+        console.log('Fallback categories results:', suggestions.length);
+      }
+
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify(suggestions)
+      };
+    }
+
     // Default response
     return {
       statusCode: 404,

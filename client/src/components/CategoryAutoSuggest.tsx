@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Search, Loader2, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { fallbackCategories } from '@/lib/fallbackData';
 
 interface CategorySuggestion {
   id: string;
@@ -44,6 +45,23 @@ function highlightText(text: string, query: string): React.ReactNode {
   );
 }
 
+// Fallback category search function
+function searchCategoriesFallback(query: string): CategorySuggestion[] {
+  if (!query || query.length < 2) {
+    return [];
+  }
+  
+  const lowerQuery = query.toLowerCase();
+  return fallbackCategories
+    .filter(category => category.name.toLowerCase().includes(lowerQuery))
+    .map(category => ({
+      id: category.id,
+      name: category.name,
+      icon: category.icon,
+      color: category.color
+    }));
+}
+
 export function CategoryAutoSuggest({
   value,
   onChange,
@@ -79,33 +97,25 @@ export function CategoryAutoSuggest({
 
     setIsLoading(true);
 
+    // Use fallback data immediately
+    console.log('Using fallback categories for query:', query);
+    const fallbackSuggestions = searchCategoriesFallback(query);
+    setSuggestions(fallbackSuggestions);
+    setShowSuggestions(fallbackSuggestions.length > 0 || showCustomOption);
+    setIsLoading(false);
+
+    // Try API call in background (optional)
     try {
       const response = await fetch(`/api/categories/search?query=${encodeURIComponent(query)}`);
       if (response.ok) {
         const categories = await response.json();
+        console.log('Received API categories:', categories.length);
         setSuggestions(categories);
         setShowSuggestions(categories.length > 0 || showCustomOption);
-      } else {
-        console.error('Failed to search categories:', response.statusText);
-        setSuggestions([]);
-        setShowSuggestions(false);
-        toast({
-          title: "Search Error",
-          description: "Failed to search categories. Please try again.",
-          variant: "destructive",
-        });
       }
     } catch (error) {
-      console.error('Error searching categories:', error);
-      setSuggestions([]);
-      setShowSuggestions(false);
-      toast({
-        title: "Search Error",
-        description: "Failed to search categories. Please check your connection and try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+      console.error('API call failed, using fallback:', error);
+      // Fallback data is already set above
     }
   }, [showCustomOption]);
 
