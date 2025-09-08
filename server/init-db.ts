@@ -9,15 +9,10 @@ import path from 'path';
 // Load environment variables from the project root
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
-// Database connection
+// NeonTech database connection (PRODUCTION ONLY)
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || process.env.NEON_DATABASE_URL,
-  host: process.env.NEON_HOST || process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.NEON_PORT || process.env.DB_PORT || '5432'),
-  database: process.env.NEON_DATABASE || process.env.DB_NAME || 'hirelocal',
-  user: process.env.NEON_USER || process.env.DB_USER || 'postgres',
-  password: process.env.NEON_PASSWORD || process.env.DB_PASSWORD,
-  ssl: process.env.NEON_HOST ? { rejectUnauthorized: false } : false,
+  ssl: { rejectUnauthorized: false }, // Required for NeonTech
 });
 
 const db = drizzle(pool, { schema });

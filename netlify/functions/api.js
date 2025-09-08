@@ -69,12 +69,36 @@ exports.handler = async (event, context) => {
     
     console.log('Request:', { method, path, queryStringParameters: event.queryStringParameters });
 
+    // Log all requests for debugging
+    console.log('=== ALL REQUESTS ===');
+    console.log('Event:', {
+      httpMethod: event.httpMethod,
+      path: event.path,
+      queryStringParameters: event.queryStringParameters,
+      body: event.body ? 'Present' : 'Empty'
+    });
+    console.log('===================');
+
     // Route handling
     if (path === '/api/health' && method === 'GET') {
       return {
         statusCode: 200,
         headers,
         body: JSON.stringify({ status: 'ok', timestamp: new Date().toISOString() })
+      };
+    }
+
+    // Simple test endpoint
+    if (path === '/api/test' && method === 'GET') {
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({ 
+          message: 'Netlify Function is working!', 
+          timestamp: new Date().toISOString(),
+          path: path,
+          method: method
+        })
       };
     }
 
@@ -348,6 +372,7 @@ exports.handler = async (event, context) => {
       console.log('Method:', method);
       console.log('Body:', body);
       console.log('Query params:', event.queryStringParameters);
+      console.log('Event path:', event.path);
       console.log('========================');
       
       const { email, password, fullName, area, role, phone } = body;

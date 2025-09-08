@@ -63,6 +63,11 @@
   to = "/.netlify/functions/api?path=/api/test-db"
   status = 200
 
+[[redirects]]
+  from = "/api/test"
+  to = "/.netlify/functions/api?path=/api/test"
+  status = 200
+
 
 # Redirect rules for SPA - this is critical
 [[redirects]]
