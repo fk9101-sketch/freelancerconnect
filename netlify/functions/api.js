@@ -73,6 +73,21 @@ exports.handler = async (event, context) => {
       };
     }
 
+    // Simple test endpoint
+    if (path === '/api/test' && method === 'GET') {
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({ 
+          message: 'API function working',
+          timestamp: new Date().toISOString(),
+          method: event.httpMethod,
+          path: event.path,
+          queryStringParameters: event.queryStringParameters
+        })
+      };
+    }
+
     if (path === '/api/users' && method === 'POST') {
       // Create user
       const { email, name, role, phone } = body;
@@ -143,6 +158,8 @@ exports.handler = async (event, context) => {
     if (path === '/api/areas/search' && method === 'GET') {
       const { query } = event.queryStringParameters || {};
       
+      console.log('Areas search request:', { query, queryStringParameters: event.queryStringParameters });
+      
       if (!query || query.length < 2) {
         return {
           statusCode: 400,
@@ -169,9 +186,12 @@ exports.handler = async (event, context) => {
           distance_km: undefined,
           meta: `${area.city} • ${area.state}`
         }));
+        
+        console.log('Database results:', suggestions.length);
       } catch (dbError) {
         console.warn("Database not accessible, using fallback areas data:", dbError.message);
         suggestions = searchAreasFallback(query, 10);
+        console.log('Fallback results:', suggestions.length);
       }
 
       return {
