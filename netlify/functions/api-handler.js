@@ -262,6 +262,83 @@ exports.handler = async (event, context) => {
       }
     }
 
+    // Customer profile update endpoint
+    if (path === '/api/customer/profile' && method === 'PUT') {
+      console.log('=== CUSTOMER PROFILE UPDATE ===');
+      console.log('Body:', body);
+      
+      const { firstName, lastName, email, area, phone } = body;
+      
+      // Validation
+      if (!firstName || !lastName || !email || !area) {
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({ 
+            message: "Required fields missing",
+            received: { firstName: !!firstName, lastName: !!lastName, email: !!email, area: !!area }
+          })
+        };
+      }
+
+      try {
+        // Get user ID from Firebase token (if available)
+        const authHeader = event.headers.authorization || event.headers.Authorization;
+        const firebaseUserId = event.headers['x-firebase-user-id'] || event.headers['X-Firebase-User-ID'];
+        
+        console.log('Auth header:', authHeader);
+        console.log('Firebase User ID:', firebaseUserId);
+
+        // For now, update by email (in production, you'd use Firebase UID)
+        const result = await neon.sql`
+          UPDATE users 
+          SET 
+            first_name = ${firstName},
+            last_name = ${lastName},
+            email = ${email},
+            area = ${area},
+            phone = ${phone || ''},
+            updated_at = NOW()
+          WHERE email = ${email}
+          RETURNING *
+        `;
+
+        if (result.length === 0) {
+          return {
+            statusCode: 404,
+            headers,
+            body: JSON.stringify({ 
+              message: "User not found",
+              email: email
+            })
+          };
+        }
+
+        console.log('✅ Profile updated successfully:', result[0]);
+
+        return {
+          statusCode: 200,
+          headers,
+          body: JSON.stringify({ 
+            success: true, 
+            user: result[0],
+            message: 'Profile updated successfully'
+          })
+        };
+
+      } catch (dbError) {
+        console.error('Database error updating profile:', dbError);
+        return {
+          statusCode: 500,
+          headers,
+          body: JSON.stringify({ 
+            error: 'Database error', 
+            message: dbError.message 
+          })
+        };
+      }
+    }
+
     // Default response for unmatched routes
     return {
       statusCode: 404,
