@@ -18,7 +18,14 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:test": "node test-db-connection.js",
-    "deploy": "npm run build && npm run start"
+    "deploy": "npm run build && npm run start",
+    "migrate:setup": "node setup-neon-env.js",
+    "migrate:export": "node export-local-data.js",
+    "migrate:neon": "node migrate-to-neon.js",
+    "migrate:verify": "node verify-neon-migration.js",
+    "migrate:full": "npm run migrate:export && npm run migrate:neon && npm run migrate:verify",
+    "migrate:quick": "node quick-migrate.js",
+    "neon:test": "node test-neon-connection.js"
   },
   "dependencies": {
     "@firebase/app": "^0.14.1",
@@ -71,6 +78,7 @@
     "cmdk": "^1.1.1",
     "connect-pg-simple": "^10.0.0",
     "date-fns": "^3.6.0",
+    "dotenv": "^16.6.1",
     "drizzle-orm": "^0.39.3",
     "drizzle-zod": "^0.7.0",
     "embla-carousel-react": "^8.6.0",
