@@ -1,7 +1,7 @@
-# NETLIFY ENVIRONMENT VARIABLES
+# NETLIFY PRODUCTION ENVIRONMENT VARIABLES
 # Copy these EXACTLY to your Netlify Dashboard → Site Settings → Environment Variables
 
-# Database Configuration
+# Database Configuration (REQUIRED)
 DATABASE_URL=postgresql://neondb_owner:npg_1U4pOodrCNbP@ep-plain-dew-a1i6qgwj-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
 
 # Node Environment
@@ -24,9 +24,9 @@ FIREBASE_MEASUREMENT_ID=G-GXMBYGFZPF
 # API Configuration
 API_BASE_URL=https://mythefreelance.netlify.app
 
-# Razorpay Configuration (if needed)
-RAZORPAY_KEY_ID=your_razorpay_key_id
-RAZORPAY_KEY_SECRET=your_razorpay_key_secret
+# Razorpay Configuration
+RAZORPAY_KEY_ID=rzp_test_R7Ty66NOUMV7mp
+RAZORPAY_KEY_SECRET=E7hYUdNJ8l8QzK9X2vF3mP6sT1wR4nB7cA0xY5zL8uI
 
-# JWT Secret (if needed)
-JWT_SECRET=your_jwt_secret_key_here
+# JWT Secret
+JWT_SECRET=your_jwt_secret_key_here_12345

@@ -46,6 +46,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/freelancers"
+  to = "/.netlify/functions/api-handler?path=/api/freelancers"
+  status = 200
+
+[[redirects]]
   from = "/api/test-simple"
   to = "/.netlify/functions/test-simple"
   status = 200

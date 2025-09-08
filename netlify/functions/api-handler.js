@@ -6,7 +6,7 @@ const neon = createClient({
 });
 
 exports.handler = async (event, context) => {
-  // Handle CORS
+  // CORS headers
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Firebase-User-ID',
@@ -14,6 +14,7 @@ exports.handler = async (event, context) => {
     'Content-Type': 'application/json'
   };
 
+  // Handle preflight requests
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 200,
@@ -26,12 +27,13 @@ exports.handler = async (event, context) => {
     const method = event.httpMethod;
     const path = event.queryStringParameters?.path || event.path;
     const body = event.body ? JSON.parse(event.body) : {};
-    
-    console.log('=== API REQUEST ===');
-    console.log('Method:', method);
+
+    console.log('=== API HANDLER REQUEST ===');
     console.log('Path:', path);
-    console.log('Body:', body ? 'Present' : 'Empty');
-    console.log('==================');
+    console.log('Method:', method);
+    console.log('Body:', body);
+    console.log('Query params:', event.queryStringParameters);
+    console.log('========================');
 
     // Test endpoint
     if (path === '/api/test' && method === 'GET') {
@@ -39,9 +41,9 @@ exports.handler = async (event, context) => {
         statusCode: 200,
         headers,
         body: JSON.stringify({ 
-          message: 'API is working!', 
+          message: 'Netlify Function is working!', 
           timestamp: new Date().toISOString(),
-          neonConnected: !!process.env.DATABASE_URL
+          domain: 'mythefreelance.netlify.app'
         })
       };
     }
@@ -55,8 +57,8 @@ exports.handler = async (event, context) => {
           headers,
           body: JSON.stringify({ 
             status: 'Database connected', 
-            result: result[0],
-            timestamp: new Date().toISOString()
+            result: result[0], 
+            timestamp: new Date().toISOString() 
           })
         };
       } catch (dbError) {
@@ -66,38 +68,41 @@ exports.handler = async (event, context) => {
           headers,
           body: JSON.stringify({ 
             error: 'Database connection failed', 
-            message: dbError.message
+            message: dbError.message, 
+            timestamp: new Date().toISOString() 
           })
         };
       }
     }
 
-    // Auth signup endpoint
+    // User signup endpoint
     if (path === '/api/auth/signup' && method === 'POST') {
       console.log('=== SIGNUP REQUEST ===');
       console.log('Body:', body);
       
       const { email, password, fullName, area, role, phone } = body;
       
-      // Validate required fields
+      // Validation
       if (!email || !password || !fullName || !area || !role) {
         return {
           statusCode: 400,
           headers,
-          body: JSON.stringify({ message: "All fields are required" })
+          body: JSON.stringify({ 
+            message: "All fields are required",
+            received: { email: !!email, password: !!password, fullName: !!fullName, area: !!area, role: !!role }
+          })
         };
       }
 
-      // Validate role
       if (!['customer', 'freelancer'].includes(role)) {
         return {
           statusCode: 400,
           headers,
-          body: JSON.stringify({ message: "Invalid role" })
+          body: JSON.stringify({ message: "Invalid role. Must be 'customer' or 'freelancer'" })
         };
       }
 
-      // Validate email format
+      // Email validation
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
         return {
@@ -108,10 +113,8 @@ exports.handler = async (event, context) => {
       }
 
       try {
-        console.log('Checking if user exists...');
         // Check if user already exists
         const existingUser = await neon.sql`SELECT id FROM users WHERE email = ${email}`;
-        
         if (existingUser.length > 0) {
           return {
             statusCode: 400,
@@ -120,26 +123,34 @@ exports.handler = async (event, context) => {
           };
         }
 
-        console.log('Creating new user...');
-        // Create user
+        // Create new user
         const result = await neon.sql`
           INSERT INTO users (email, first_name, last_name, area, role, phone, created_at)
           VALUES (${email}, ${fullName.split(' ')[0] || ''}, ${fullName.split(' ').slice(1).join(' ') || ''}, ${area}, ${role}, ${phone || ''}, NOW())
           RETURNING *
         `;
-        
-        console.log('User created successfully:', result[0]?.id);
+
+        console.log('✅ User created successfully:', result[0]);
+
         return {
           statusCode: 201,
           headers,
-          body: JSON.stringify({ success: true, user: result[0] })
+          body: JSON.stringify({ 
+            success: true, 
+            user: result[0],
+            message: 'Account created successfully'
+          })
         };
+
       } catch (dbError) {
         console.error('Database error during signup:', dbError);
         return {
           statusCode: 500,
           headers,
-          body: JSON.stringify({ message: "Failed to create user", error: dbError.message })
+          body: JSON.stringify({ 
+            error: 'Database error', 
+            message: dbError.message 
+          })
         };
       }
     }
@@ -151,81 +162,135 @@ exports.handler = async (event, context) => {
         return {
           statusCode: 200,
           headers,
-          body: JSON.stringify(categories)
+          body: JSON.stringify({ 
+            success: true, 
+            categories: categories,
+            count: categories.length
+          })
         };
-      } catch (error) {
-        console.error('Error fetching categories:', error);
+      } catch (dbError) {
+        console.error('Database error fetching categories:', dbError);
         return {
           statusCode: 500,
           headers,
-          body: JSON.stringify({ error: 'Failed to fetch categories' })
+          body: JSON.stringify({ 
+            error: 'Database error', 
+            message: dbError.message 
+          })
         };
       }
     }
 
     // Areas endpoint
-    if (path === '/api/areas' && method === 'GET') {
+    if (path.startsWith('/api/areas') && method === 'GET') {
       try {
         const query = event.queryStringParameters?.query || '';
-        if (!query || query.length < 2) {
-          return {
-            statusCode: 400,
-            headers,
-            body: JSON.stringify({ error: 'Query parameter required (min 2 characters)' })
-          };
+        let areas;
+        
+        if (query) {
+          areas = await neon.sql`SELECT * FROM areas WHERE name ILIKE ${'%' + query + '%'} ORDER BY name LIMIT 20`;
+        } else {
+          areas = await neon.sql`SELECT * FROM areas ORDER BY name LIMIT 50`;
         }
-
-        const areas = await neon.sql`
-          SELECT * FROM areas 
-          WHERE LOWER(name) LIKE LOWER(${`%${query}%`}) 
-          ORDER BY name 
-          LIMIT 10
-        `;
         
         return {
           statusCode: 200,
           headers,
-          body: JSON.stringify(areas)
+          body: JSON.stringify({ 
+            success: true, 
+            areas: areas,
+            count: areas.length,
+            query: query
+          })
         };
-      } catch (error) {
-        console.error('Error fetching areas:', error);
+      } catch (dbError) {
+        console.error('Database error fetching areas:', dbError);
         return {
           statusCode: 500,
           headers,
-          body: JSON.stringify({ error: 'Failed to fetch areas' })
+          body: JSON.stringify({ 
+            error: 'Database error', 
+            message: dbError.message 
+          })
         };
       }
     }
 
-    // Default 404 response
-    console.log('=== UNMATCHED REQUEST ===');
-    console.log('Path:', path);
-    console.log('Method:', method);
-    console.log('========================');
-    
+    // Freelancers endpoint
+    if (path === '/api/freelancers' && method === 'GET') {
+      try {
+        const { area, category, limit = 20 } = event.queryStringParameters || {};
+        
+        let query = 'SELECT * FROM users WHERE role = \'freelancer\'';
+        const params = [];
+        
+        if (area) {
+          query += ' AND area = $' + (params.length + 1);
+          params.push(area);
+        }
+        
+        if (category) {
+          query += ' AND category = $' + (params.length + 1);
+          params.push(category);
+        }
+        
+        query += ' ORDER BY created_at DESC LIMIT $' + (params.length + 1);
+        params.push(parseInt(limit));
+        
+        const freelancers = await neon.sql(query, params);
+        
+        return {
+          statusCode: 200,
+          headers,
+          body: JSON.stringify({ 
+            success: true, 
+            freelancers: freelancers,
+            count: freelancers.length,
+            filters: { area, category, limit }
+          })
+        };
+      } catch (dbError) {
+        console.error('Database error fetching freelancers:', dbError);
+        return {
+          statusCode: 500,
+          headers,
+          body: JSON.stringify({ 
+            error: 'Database error', 
+            message: dbError.message 
+          })
+        };
+      }
+    }
+
+    // Default response for unmatched routes
     return {
       statusCode: 404,
       headers,
       body: JSON.stringify({ 
-        error: 'Not found', 
-        path: path,
-        method: method,
+        error: 'API endpoint not found', 
+        path, 
+        method,
         availableEndpoints: [
           'GET /api/test',
           'GET /api/test-db',
           'POST /api/auth/signup',
           'GET /api/categories',
-          'GET /api/areas?query=...'
+          'GET /api/areas',
+          'GET /api/freelancers'
         ]
       })
     };
 
   } catch (error) {
-    console.error('API Error:', error);
+    console.error('API Handler Error:', error);
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: 'Internal server error', message: error.message })
+      body: JSON.stringify({ 
+        message: 'Internal Server Error', 
+        error: error.message,
+        timestamp: new Date().toISOString()
+      })
     };
   }
 };
