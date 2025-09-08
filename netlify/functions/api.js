@@ -58,8 +58,11 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const { method, path } = event;
+    const method = event.httpMethod;
+    const path = event.path;
     const body = event.body ? JSON.parse(event.body) : {};
+    
+    console.log('Request:', { method, path, queryStringParameters: event.queryStringParameters });
 
     // Route handling
     if (path === '/api/health' && method === 'GET') {
