@@ -51,17 +51,10 @@ try {
     throw new Error('❌ Assets directory not found');
   }
 
-  // Create _redirects file for SPA routing with multiple patterns
-  const redirectsContent = `# SPA redirects
-/*    /index.html   200
-
-# Handle root path
-/    /index.html   200
-
-# Handle all other paths
-/*    /index.html   200`;
+  // Create _redirects file for SPA routing - Netlify format
+  const redirectsContent = `/*    /index.html   200`;
   fs.writeFileSync(path.join(publicDir, '_redirects'), redirectsContent);
-  console.log('✅ Created comprehensive _redirects file for SPA routing');
+  console.log('✅ Created _redirects file for SPA routing');
 
   // Create _headers file for better caching
   const headersContent = `/*
