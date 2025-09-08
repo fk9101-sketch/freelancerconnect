@@ -1,6 +1,11 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 import { auth } from "./firebase";
 
+// API base URL configuration
+const API_BASE_URL = import.meta.env.PROD 
+  ? 'https://myprojectfreelanace.netlify.app/api'
+  : 'http://localhost:5001/api';
+
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
@@ -40,7 +45,10 @@ export async function apiRequest(
     headers["X-Firebase-User-ID"] = firebaseUser.uid;
   }
 
-  const res = await fetch(url, {
+  // Construct full URL
+  const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+  
+  const res = await fetch(fullUrl, {
     method,
     headers,
     body: (method === 'GET' || method === 'HEAD') ? undefined : (data ? JSON.stringify(data) : undefined),

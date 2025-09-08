@@ -3,6 +3,10 @@ import pkg from 'pg';
 const { Pool } = pkg;
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import * as schema from '@shared/schema';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
 
 // Database connection
 const pool = new Pool({
