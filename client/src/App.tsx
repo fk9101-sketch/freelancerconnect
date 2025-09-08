@@ -28,6 +28,7 @@ import OurServices from "@/pages/our-services";
 import RewardsOffers from "@/pages/rewards-offers";
 import PaymentSuccess from "@/pages/payment-success";
 import PaymentFailed from "@/pages/payment-failed";
+import DatabaseViewer from "@/pages/database-viewer";
 import TestInquiry from "@/pages/test-inquiry";
 import FreelancerReviews from "@/pages/freelancer-reviews";
 
@@ -222,6 +223,7 @@ function Router() {
             <Route path="/freelancer/profile" component={() => <ProtectedRoute component={FreelancerProfile} allowedRoles={['freelancer']} fallbackRoute="/freelancer" />} />
             <Route path="/admin/profile" component={() => <ProtectedAdminRoute component={Profile} fallbackRoute="/customer" />} />
             <Route path="/admin/*" component={() => <ProtectedAdminRoute component={AdminDashboard} fallbackRoute="/customer" />} />
+            <Route path="/database" component={() => <ProtectedAdminRoute component={DatabaseViewer} fallbackRoute="/customer" />} />
             <Route path="/test-inquiry" component={TestInquiry} />
             <Route component={Home} />
           </>

@@ -35,6 +35,33 @@ export const signInWithGoogle = async () => {
     
     const result = await signInWithPopup(auth, googleProvider);
     console.log("Google sign-in successful:", result.user);
+    
+    // Save user to database
+    const user = result.user;
+    if (user) {
+      console.log("Saving user to database...");
+      try {
+        const response = await fetch('/.netlify/functions/api/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: user.email,
+            name: user.displayName || user.email,
+            role: 'customer',
+            firebase_uid: user.uid
+          })
+        });
+        
+        if (response.ok) {
+          console.log("User saved to database successfully");
+        } else {
+          console.warn("Failed to save user to database, but continuing with auth");
+        }
+      } catch (dbError) {
+        console.warn("Database error (user still authenticated):", dbError);
+      }
+    }
+    
     return result.user;
   } catch (error: any) {
     console.error("Error signing in with Google:", error);
@@ -65,6 +92,33 @@ export const signInWithGoogle = async () => {
 export const signUpWithEmail = async (email: string, password: string) => {
   try {
     const result = await createUserWithEmailAndPassword(auth, email, password);
+    
+    // Save user to database
+    const user = result.user;
+    if (user) {
+      console.log("Saving user to database...");
+      try {
+        const response = await fetch('/.netlify/functions/api/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: user.email,
+            name: user.displayName || user.email,
+            role: 'customer',
+            firebase_uid: user.uid
+          })
+        });
+        
+        if (response.ok) {
+          console.log("User saved to database successfully");
+        } else {
+          console.warn("Failed to save user to database, but continuing with auth");
+        }
+      } catch (dbError) {
+        console.warn("Database error (user still authenticated):", dbError);
+      }
+    }
+    
     return result.user;
   } catch (error) {
     console.error("Error signing up with email:", error);
