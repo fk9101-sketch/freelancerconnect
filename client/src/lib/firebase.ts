@@ -3,13 +3,13 @@ import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, RecaptchaVerifie
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyC4n_Cum0CvMyrIIWiehMltWO92MYnCvgw",
-  authDomain: "freelancer-connect-899a8.firebaseapp.com",
-  projectId: "freelancer-connect-899a8",
-  storageBucket: "freelancer-connect-899a8.firebasestorage.app",
-  messagingSenderId: "224541104230",
-  appId: "1:224541104230:web:62bb08bdd9ae55872a35a7",
-  measurementId: "G-GXMBYGFZPF"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyC4n_Cum0CvMyrIIWiehMltWO92MYnCvgw",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "freelancer-connect-899a8.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "freelancer-connect-899a8",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "freelancer-connect-899a8.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "224541104230",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:224541104230:web:62bb08bdd9ae55872a35a7",
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-GXMBYGFZPF"
 };
 
 // Initialize Firebase
@@ -33,34 +33,13 @@ export const signInWithGoogle = async () => {
     console.log("Current domain:", window.location.origin);
     console.log("Firebase config:", firebaseConfig);
     
+    // Check if we're in a secure context
+    if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+      throw new Error('Google sign-in requires HTTPS or localhost');
+    }
+    
     const result = await signInWithPopup(auth, googleProvider);
     console.log("Google sign-in successful:", result.user);
-    
-    // Save user to database
-    const user = result.user;
-    if (user) {
-      console.log("Saving user to database...");
-      try {
-        const response = await fetch('/.netlify/functions/api/users', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: user.email,
-            name: user.displayName || user.email,
-            role: 'customer',
-            firebase_uid: user.uid
-          })
-        });
-        
-        if (response.ok) {
-          console.log("User saved to database successfully");
-        } else {
-          console.warn("Failed to save user to database, but continuing with auth");
-        }
-      } catch (dbError) {
-        console.warn("Database error (user still authenticated):", dbError);
-      }
-    }
     
     return result.user;
   } catch (error: any) {
@@ -78,13 +57,24 @@ export const signInWithGoogle = async () => {
     // Handle domain/redirect errors
     if (error.code === 'auth/unauthorized-domain') {
       console.error("Domain not authorized. Please add this domain to Firebase authorized domains:", window.location.origin);
+      throw new Error(`Domain ${window.location.origin} is not authorized for Google sign-in. Please contact support.`);
     }
     
     if (error.code === 'auth/operation-not-allowed') {
       console.error("Google sign-in is not enabled. Please enable it in Firebase Console.");
+      throw new Error('Google sign-in is not enabled. Please contact support.');
     }
     
-    throw error;
+    if (error.code === 'auth/popup-blocked') {
+      throw new Error('Popup was blocked by browser. Please allow popups and try again.');
+    }
+    
+    if (error.code === 'auth/network-request-failed') {
+      throw new Error('Network error. Please check your internet connection and try again.');
+    }
+    
+    // Generic error handling
+    throw new Error(error.message || 'Failed to sign in with Google. Please try again.');
   }
 };
 

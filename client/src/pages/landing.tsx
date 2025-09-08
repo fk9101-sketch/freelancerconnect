@@ -135,16 +135,36 @@ export default function Landing() {
       }
     } catch (error: any) {
       console.error("Login error:", error);
+      
+      // Handle specific error cases
       if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
         toast({
           title: "Login Cancelled",
           description: "You closed the sign-in window. Please try again.",
           variant: "default",
         });
+      } else if (error.message?.includes('unauthorized-domain')) {
+        toast({
+          title: "Domain Not Authorized",
+          description: "This domain is not authorized for Google sign-in. Please contact support.",
+          variant: "destructive",
+        });
+      } else if (error.message?.includes('popup-blocked')) {
+        toast({
+          title: "Popup Blocked",
+          description: "Please allow popups for this site and try again.",
+          variant: "destructive",
+        });
+      } else if (error.message?.includes('network')) {
+        toast({
+          title: "Network Error",
+          description: "Please check your internet connection and try again.",
+          variant: "destructive",
+        });
       } else {
         toast({
           title: "Login Failed",
-          description: "Failed to sign in with Google. Please try again.",
+          description: error.message || "Failed to sign in with Google. Please try again.",
           variant: "destructive",
         });
       }

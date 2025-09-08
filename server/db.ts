@@ -5,12 +5,8 @@ import * as schema from "@shared/schema";
 
 // Create PostgreSQL database connection
 const pool = new Pool({
-  host: process.env.NEON_HOST || process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.NEON_PORT || process.env.DB_PORT || '5432'),
-  database: process.env.NEON_DATABASE || process.env.DB_NAME || 'hirelocal',
-  user: process.env.NEON_USER || process.env.DB_USER || 'postgres',
-  password: process.env.NEON_PASSWORD || process.env.DB_PASSWORD || 'Jhotwara#321',
-  ssl: process.env.NEON_HOST ? { rejectUnauthorized: false } : (process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false),
+  connectionString: process.env.DATABASE_URL || process.env.NEON_DATABASE_URL,
+  ssl: process.env.DATABASE_URL || process.env.NEON_DATABASE_URL ? { rejectUnauthorized: false } : false,
 });
 
 const db = drizzle(pool, { schema });
@@ -19,32 +15,25 @@ const db = drizzle(pool, { schema });
 const testConnection = async () => {
   try {
     console.log('🔄 Testing PostgreSQL connection...');
-    console.log(`Host: ${process.env.DB_HOST || 'localhost'}`);
-    console.log(`Port: ${process.env.DB_PORT || '5000'}`);
-    console.log(`Database: ${process.env.DB_NAME || 'hirelocal'}`);
-    console.log(`User: ${process.env.DB_USER || 'postgres'}`);
+    console.log(`Using connection string: ${process.env.DATABASE_URL ? 'Yes' : 'No'}`);
+    console.log(`Using Neon URL: ${process.env.NEON_DATABASE_URL ? 'Yes' : 'No'}`);
     
     const result = await pool.query('SELECT NOW() as current_time, version() as version');
     console.log('✅ PostgreSQL database connection successful!');
     console.log(`Current time: ${result.rows[0].current_time}`);
     console.log(`PostgreSQL version: ${result.rows[0].version.split(' ')[0]} ${result.rows[0].version.split(' ')[1]}`);
     
-    // Test if database exists
-    const dbResult = await pool.query("SELECT datname FROM pg_database WHERE datname = 'hirelocal'");
-    if (dbResult.rows.length > 0) {
-      console.log('✅ Database "hirelocal" exists');
-    } else {
-      console.log('❌ Database "hirelocal" does not exist. Please create it first.');
-      console.log('Run: CREATE DATABASE hirelocal;');
-    }
+    // Test if we can query the users table
+    const tableResult = await pool.query("SELECT COUNT(*) as count FROM users");
+    console.log(`✅ Users table accessible, count: ${tableResult.rows[0].count}`);
     
   } catch (error) {
     console.error('❌ PostgreSQL database connection failed:', error.message);
     console.log('\nTroubleshooting tips:');
-    console.log('1. Make sure PostgreSQL is running');
-    console.log('2. Check if the database "hirelocal" exists');
-    console.log('3. Verify your credentials');
-    console.log('4. Ensure PostgreSQL is running on port 5000');
+    console.log('1. Check your DATABASE_URL environment variable');
+    console.log('2. Verify your Neon database credentials');
+    console.log('3. Ensure the database is accessible');
+    console.log('4. Check if the database schema is properly set up');
   }
 };
 
