@@ -59,7 +59,8 @@ exports.handler = async (event, context) => {
 
   try {
     const method = event.httpMethod;
-    const path = event.path;
+    // Get path from query parameter if redirected, otherwise use event.path
+    const path = event.queryStringParameters?.path || event.path;
     const body = event.body ? JSON.parse(event.body) : {};
     
     console.log('Request:', { method, path, queryStringParameters: event.queryStringParameters });
@@ -309,7 +310,12 @@ exports.handler = async (event, context) => {
 
     // Auth signup endpoint
     if (path === '/api/auth/signup' && method === 'POST') {
-      console.log('Signup request received:', { email: body.email, role: body.role });
+      console.log('=== SIGNUP REQUEST ===');
+      console.log('Path:', path);
+      console.log('Method:', method);
+      console.log('Body:', body);
+      console.log('Query params:', event.queryStringParameters);
+      console.log('========================');
       
       const { email, password, fullName, area, role, phone } = body;
       
@@ -381,11 +387,22 @@ exports.handler = async (event, context) => {
       }
     }
 
-    // Default response
+    // Default response - log what we received
+    console.log('=== UNMATCHED REQUEST ===');
+    console.log('Path:', path);
+    console.log('Method:', method);
+    console.log('Query params:', event.queryStringParameters);
+    console.log('========================');
+    
     return {
       statusCode: 404,
       headers,
-      body: JSON.stringify({ error: 'Not found' })
+      body: JSON.stringify({ 
+        error: 'Not found', 
+        path: path,
+        method: method,
+        queryParams: event.queryStringParameters
+      })
     };
 
   } catch (error) {
