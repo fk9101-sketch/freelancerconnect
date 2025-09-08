@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label';
 import { MapPin, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { searchAreasFallback } from '@/lib/fallbackData';
 
 interface AreaSuggestion {
   name: string;
@@ -138,13 +139,14 @@ export function AreaAutoSuggest({
       setShowSuggestions(data.length > 0);
     } catch (error) {
       console.error('Error fetching area suggestions:', error);
-      setSuggestions([]);
-      setShowSuggestions(false);
-      toast({
-        title: "Search Error",
-        description: "Failed to search areas. Please check your connection and try again.",
-        variant: "destructive",
-      });
+      console.log('Using fallback areas data');
+      
+      // Use fallback data when API fails
+      const fallbackSuggestions = searchAreasFallback(query, 10);
+      setSuggestions(fallbackSuggestions);
+      setShowSuggestions(fallbackSuggestions.length > 0);
+      
+      // Don't show error toast, just use fallback silently
     } finally {
       setIsLoading(false);
     }
