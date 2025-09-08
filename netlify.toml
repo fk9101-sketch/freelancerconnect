@@ -33,6 +33,11 @@
   to = "/.netlify/functions/api?path=/api/categories/search"
   status = 200
 
+[[redirects]]
+  from = "/api/test-categories"
+  to = "/.netlify/functions/test-categories"
+  status = 200
+
 # Redirect rules for SPA - this is critical
 [[redirects]]
   from = "/*"
