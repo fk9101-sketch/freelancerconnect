@@ -41,7 +41,7 @@ export default defineConfig(({ mode }) => ({
       }
     },
     // Ensure production build
-    target: 'es2015',
+    target: 'es2020',
     cssCodeSplit: true,
     reportCompressedSize: false
   },
@@ -65,4 +65,4 @@ export default defineConfig(({ mode }) => ({
   // Ensure proper build output for Netlify
   base: "/",
   publicDir: "public"
-});
+}));
