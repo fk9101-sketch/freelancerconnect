@@ -11,6 +11,7 @@ import { hasAdminAccess } from "@/lib/roleUtils";
 import { apiRequest } from "@/lib/queryClient";
 import { sortFreelancersWithPaidMembersFirst } from "@/lib/utils";
 import { fallbackCategories } from '@/lib/fallbackData';
+import { fullCategoriesData } from '@/lib/fullCategoriesData';
 
 // Helper function to apply correct sorting logic based on filter requirements
 function applyCorrectSortingLogic(
@@ -266,9 +267,9 @@ export default function CustomerDashboard() {
         if (!response.ok) throw new Error('Failed to fetch categories');
         return response.json();
       } catch (error) {
-        console.log('Using fallback categories');
-        // Return fallback categories from shared data
-        return fallbackCategories;
+        console.log('Using full categories data from database');
+        // Return full categories data from database (177 categories)
+        return fullCategoriesData;
       }
     },
     retry: false,

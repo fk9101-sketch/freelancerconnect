@@ -5,6 +5,7 @@ import { Search, Loader2, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { fallbackCategories } from '@/lib/fallbackData';
+import { fullCategoriesData } from '@/lib/fullCategoriesData';
 
 interface CategorySuggestion {
   id: string;
@@ -45,14 +46,14 @@ function highlightText(text: string, query: string): React.ReactNode {
   );
 }
 
-// Fallback category search function
+// Fallback category search function using full database data
 function searchCategoriesFallback(query: string): CategorySuggestion[] {
   if (!query || query.length < 2) {
     return [];
   }
   
   const lowerQuery = query.toLowerCase();
-  return fallbackCategories
+  return fullCategoriesData
     .filter(category => category.name.toLowerCase().includes(lowerQuery))
     .map(category => ({
       id: category.id,
