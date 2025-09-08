@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { hasAdminAccess } from "@/lib/roleUtils";
 import { apiRequest } from "@/lib/queryClient";
 import { sortFreelancersWithPaidMembersFirst } from "@/lib/utils";
+import { fallbackCategories } from '@/lib/fallbackData';
 
 // Helper function to apply correct sorting logic based on filter requirements
 function applyCorrectSortingLogic(
@@ -266,16 +267,8 @@ export default function CustomerDashboard() {
         return response.json();
       } catch (error) {
         console.log('Using fallback categories');
-        // Return fallback categories
-        return [
-          { id: '1', name: 'Web Development', icon: '💻', color: '#3B82F6', isActive: true },
-          { id: '2', name: 'Mobile Development', icon: '📱', color: '#10B981', isActive: true },
-          { id: '3', name: 'Design', icon: '🎨', color: '#F59E0B', isActive: true },
-          { id: '4', name: 'Writing', icon: '✍️', color: '#8B5CF6', isActive: true },
-          { id: '5', name: 'Marketing', icon: '📈', color: '#EF4444', isActive: true },
-          { id: '6', name: 'Consulting', icon: '💼', color: '#06B6D4', isActive: true },
-          { id: '7', name: 'Other', icon: '🔧', color: '#6B7280', isActive: true }
-        ];
+        // Return fallback categories from shared data
+        return fallbackCategories;
       }
     },
     retry: false,

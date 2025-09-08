@@ -1,11 +1,9 @@
-const { createClient } = require('@neondatabase/serverless');
+import { neon } from '@neondatabase/serverless';
 
 // Initialize Neon client
-const neon = createClient({
-  connectionString: process.env.DATABASE_URL
-});
+const sql = neon(process.env.DATABASE_URL);
 
-exports.handler = async (event, context) => {
+export const handler = async (event, context) => {
   // Handle CORS
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -23,7 +21,7 @@ exports.handler = async (event, context) => {
 
   try {
     try {
-      const result = await neon.sql`SELECT * FROM categories WHERE is_active = true ORDER BY name`;
+      const result = await sql`SELECT * FROM categories WHERE is_active = true ORDER BY name`;
       console.log('Database categories count:', result.length);
       return {
         statusCode: 200,
