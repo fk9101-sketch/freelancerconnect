@@ -18,18 +18,18 @@ try {
 
   // Verify build output
   console.log('✅ Verifying build output...');
-  const publicDir = 'dist/public';
-  if (!fs.existsSync(publicDir)) {
+  const buildDir = 'dist';
+  if (!fs.existsSync(buildDir)) {
     throw new Error('❌ Build output directory not found');
   }
 
-  const indexHtml = path.join(publicDir, 'index.html');
+  const indexHtml = path.join(buildDir, 'index.html');
   if (!fs.existsSync(indexHtml)) {
     throw new Error('❌ index.html not found');
   }
 
   // Check for assets
-  const assetsDir = path.join(publicDir, 'assets');
+  const assetsDir = path.join(buildDir, 'assets');
   if (fs.existsSync(assetsDir)) {
     const assets = fs.readdirSync(assetsDir);
     console.log('📄 Assets found:', assets);
@@ -53,11 +53,11 @@ try {
 
   // Create a simple _redirects file for Netlify SPA routing (backup)
   const redirectsContent = `/*    /index.html   200`;
-  fs.writeFileSync(path.join(publicDir, '_redirects'), redirectsContent);
+  fs.writeFileSync(path.join(buildDir, '_redirects'), redirectsContent);
   console.log('✅ Created _redirects file for SPA routing (backup)');
 
   console.log('🎉 Netlify build completed successfully!');
-  console.log('📁 Static files: dist/public/');
+  console.log('📁 Static files: dist/');
   console.log('🌐 Ready for Netlify deployment!');
 } catch (error) {
   console.error('💥 Netlify build failed:', error.message);
