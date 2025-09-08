@@ -124,7 +124,7 @@ export function AreaMultiSelect({
       console.log('Searching areas with query:', query);
       
       // Use the current server port
-      const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:5001' : '';
+      const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:5001' : 'https://myprojectfreelanace.netlify.app';
       const response = await fetch(`${baseUrl}/api/areas?${params}`);
       
       if (!response.ok) {

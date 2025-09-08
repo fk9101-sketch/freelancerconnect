@@ -2,9 +2,15 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
-    react(),
+    react({
+      // Disable React dev tools in production
+      ...(mode === 'production' && {
+        jsxRuntime: 'automatic',
+        jsxImportSource: 'react'
+      })
+    }),
   ],
   resolve: {
     alias: {
@@ -30,9 +36,14 @@ export default defineConfig({
     terserOptions: {
       compress: {
         drop_console: true,
-        drop_debugger: true
+        drop_debugger: true,
+        pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.warn']
       }
-    }
+    },
+    // Ensure production build
+    target: 'es2015',
+    cssCodeSplit: true,
+    reportCompressedSize: false
   },
   server: {
     fs: {
@@ -45,9 +56,9 @@ export default defineConfig({
     },
     proxy: {
       '/api': {
-        target: 'http://localhost:5001',
+        target: 'https://myprojectfreelanace.netlify.app',
         changeOrigin: true,
-        secure: false,
+        secure: true,
       }
     }
   },

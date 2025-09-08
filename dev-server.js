@@ -12,11 +12,12 @@ const PORT = 3000;
 // Serve static files from the client directory
 app.use(express.static(path.join(__dirname, 'client')));
 
-// Proxy API calls to the test server on port 5001
+// Proxy API calls to the production server
 app.use('/api', createProxyMiddleware({
-  target: 'http://localhost:5001',
+  target: 'https://myprojectfreelanace.netlify.app',
   changeOrigin: true,
   logLevel: 'info',
+  secure: true,
   pathRewrite: {
     '^/api': '/api' // Keep the /api prefix
   }
@@ -29,6 +30,6 @@ app.get('*', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`🚀 Development server running on http://localhost:${PORT}`);
-  console.log(`📡 API calls will be proxied to http://localhost:5001`);
+  console.log(`📡 API calls will be proxied to https://myprojectfreelanace.netlify.app`);
   console.log(`🌐 Open your browser and go to: http://localhost:${PORT}`);
 });
