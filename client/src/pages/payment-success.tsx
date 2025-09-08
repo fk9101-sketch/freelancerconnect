@@ -16,17 +16,25 @@ export default function PaymentSuccess() {
   const [error, setError] = useState<string | null>(null);
   const [redirectCountdown, setRedirectCountdown] = useState(3);
   const [subscriptionType, setSubscriptionType] = useState<string>('lead');
+  const [isClient, setIsClient] = useState(false);
 
-  // Get URL parameters from Razorpay redirect
-  const urlParams = new URLSearchParams(window.location.search);
-  const isVerified = urlParams.get('verified') === 'true';
-  const urlSubscriptionType = urlParams.get('subscriptionType') || 'lead';
-  const razorpayOrderId = urlParams.get('razorpay_order_id');
-  const razorpayPaymentId = urlParams.get('razorpay_payment_id');
-  const razorpaySignature = urlParams.get('razorpay_signature');
-
-  // Handle payment success on component mount
+  // Ensure we're on the client side before accessing window
   useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Get URL parameters from Razorpay redirect (only on client side)
+  const urlParams = isClient ? new URLSearchParams(window.location.search) : new URLSearchParams();
+  const isVerified = isClient ? urlParams.get('verified') === 'true' : false;
+  const urlSubscriptionType = isClient ? (urlParams.get('subscriptionType') || 'lead') : 'lead';
+  const razorpayOrderId = isClient ? urlParams.get('razorpay_order_id') : null;
+  const razorpayPaymentId = isClient ? urlParams.get('razorpay_payment_id') : null;
+  const razorpaySignature = isClient ? urlParams.get('razorpay_signature') : null;
+
+  // Handle payment success on component mount (only on client side)
+  useEffect(() => {
+    if (!isClient) return;
+    
     const handlePaymentSuccess = async () => {
       try {
         // If payment is already verified (from RazorpayPayment component), show success
@@ -149,7 +157,7 @@ export default function PaymentSuccess() {
       // If not authenticated, redirect to landing
       setLocation('/');
     }
-  }, [isAuthenticated, isLoading, isVerified, urlSubscriptionType, razorpayOrderId, razorpayPaymentId, razorpaySignature, setLocation, toast]);
+  }, [isClient, isAuthenticated, isLoading, isVerified, urlSubscriptionType, razorpayOrderId, razorpayPaymentId, razorpaySignature, setLocation, toast]);
 
   const handleGoToMyPlans = () => {
     setLocation('/my-plans');
@@ -163,7 +171,8 @@ export default function PaymentSuccess() {
     setLocation('/plans');
   };
 
-  if (isLoading || verifying) {
+  // Show loading state while not on client side or while verifying
+  if (!isClient || isLoading || verifying) {
     return (
       <div className="min-h-screen bg-background">
         <div className="flex items-center justify-center min-h-screen p-4">
@@ -172,15 +181,17 @@ export default function PaymentSuccess() {
               <div className="flex justify-center mb-4">
                 <Loader2 className="h-16 w-16 text-blue-500 animate-spin" />
               </div>
-              <CardTitle className="text-2xl text-blue-600">Verifying Payment...</CardTitle>
+              <CardTitle className="text-2xl text-blue-600">
+                {!isClient ? 'Loading...' : 'Verifying Payment...'}
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="text-center space-y-2">
                 <p className="text-lg font-medium text-foreground">
-                  Please wait while we verify your payment
+                  {!isClient ? 'Initializing application...' : 'Please wait while we verify your payment'}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  This may take a few moments.
+                  {!isClient ? 'This may take a moment.' : 'This may take a few moments.'}
                 </p>
               </div>
             </CardContent>

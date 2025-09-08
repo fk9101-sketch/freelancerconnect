@@ -4,7 +4,7 @@ import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
-console.log('🚀 ULTRA SIMPLE STATIC BUILD...');
+console.log('🚀 Starting Netlify build process...');
 
 try {
   // Clean previous builds
@@ -13,7 +13,7 @@ try {
   }
 
   // Build client with Vite
-  console.log('📦 Building with Vite...');
+  console.log('📦 Building client with Vite...');
   execSync('npx vite build', { stdio: 'inherit' });
 
   // Verify build output
@@ -51,15 +51,15 @@ try {
     throw new Error('❌ Assets directory not found');
   }
 
-  // Create _redirects file for SPA routing
+  // Create a simple _redirects file for Netlify SPA routing (backup)
   const redirectsContent = `/*    /index.html   200`;
   fs.writeFileSync(path.join(publicDir, '_redirects'), redirectsContent);
-  console.log('✅ Created _redirects file for SPA routing');
+  console.log('✅ Created _redirects file for SPA routing (backup)');
 
-  console.log('🎉 ULTRA SIMPLE BUILD COMPLETED!');
+  console.log('🎉 Netlify build completed successfully!');
   console.log('📁 Static files: dist/public/');
-  console.log('🌐 Ready for static deployment!');
+  console.log('🌐 Ready for Netlify deployment!');
 } catch (error) {
-  console.error('💥 Build failed:', error.message);
+  console.error('💥 Netlify build failed:', error.message);
   process.exit(1);
 }

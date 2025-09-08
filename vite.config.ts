@@ -29,7 +29,18 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       output: {
-        manualChunks: undefined
+        manualChunks: undefined,
+        entryFileNames: 'assets/[name].[hash].js',
+        chunkFileNames: 'assets/[name].[hash].js',
+        assetFileNames: 'assets/[name].[hash].[ext]'
+      }
+    },
+    sourcemap: false,
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true
       }
     }
   },
@@ -41,13 +52,16 @@ export default defineConfig({
     hmr: false, // Disable HMR to prevent auto-refresh
     watch: {
       ignored: ['**/node_modules/**', '**/dist/**']
+    },
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5001',
+        changeOrigin: true,
+        secure: false,
+      }
     }
   },
-  // Add this for Vercel detection
-  define: {
-    __VITE_APP__: JSON.stringify(true)
-  },
-  // Ensure proper build output for Vercel
+  // Ensure proper build output for Netlify
   base: "/",
   publicDir: "public"
 });

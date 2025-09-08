@@ -25,7 +25,7 @@ if %errorlevel% equ 0 (
     echo.
     echo 📋 Next steps:
     echo 1. Push your code to GitHub
-    echo 2. Connect to your deployment platform (Railway, Vercel, etc.)
+    echo 2. Connect to your deployment platform (Railway, Netlify, etc.)
     echo 3. Set environment variables in your platform
     echo 4. Deploy!
 ) else (

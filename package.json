@@ -7,8 +7,7 @@
     "dev": "cross-env NODE_ENV=development tsx server/index.ts",
     "dev:win": "cross-env NODE_ENV=development tsx server/index.ts",
     "build": "node build.js",
-    "vercel-build": "node vercel-build.js",
-    "vercel-build-static": "npm run build",
+    "netlify-build": "node netlify-build.js",
     "start": "cross-env NODE_ENV=production node dist/index.js",
     "preview": "npm run build && npm run start",
     "check": "tsc",
@@ -17,8 +16,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:test": "node test-db-connection.js",
-    "deploy": "npm run build && npm run start",
-    "build:vercel": "npm run build"
+    "deploy": "npm run build && npm run start"
   },
   "dependencies": {
     "@firebase/app": "^0.14.1",

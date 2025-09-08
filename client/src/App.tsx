@@ -158,7 +158,10 @@ function Router() {
     return (
       <div className="mobile-container">
         <div className="flex items-center justify-center min-h-screen">
-          <div className="spinner"></div>
+          <div className="flex flex-col items-center space-y-4">
+            <div className="spinner"></div>
+            <p className="text-muted-foreground">Loading application...</p>
+          </div>
         </div>
       </div>
     );
@@ -169,14 +172,14 @@ function Router() {
     return (
       <div className="mobile-container">
         <div className="flex items-center justify-center min-h-screen p-4">
-          <div className="text-center">
+          <div className="text-center max-w-md">
             <h2 className="text-xl font-bold text-red-500 mb-4">Authentication Error</h2>
             <p className="text-muted-foreground mb-4">
               There was an issue with authentication. Please refresh the page.
             </p>
             <button 
               onClick={() => window.location.reload()} 
-              className="bg-primary text-white px-4 py-2 rounded-lg"
+              className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
             >
               Refresh Page
             </button>

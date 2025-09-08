@@ -49,15 +49,15 @@ Railway is perfect for full-stack apps with databases.
 
 ---
 
-### Option 2: Vercel + Railway Database
+### Option 2: Netlify + Railway Database
 
-#### Frontend (Vercel):
-1. **Sign up at [vercel.com](https://vercel.com)**
+#### Frontend (Netlify):
+1. **Sign up at [netlify.com](https://netlify.com)**
 2. **Connect your GitHub repository**
 3. **Set build settings:**
-   - Build Command: `cd client && npm run build`
-   - Output Directory: `client/dist`
-   - Install Command: `npm install`
+   - Build Command: `npm run build`
+   - Publish Directory: `dist/public`
+   - Node Version: 18
 
 #### Backend + Database (Railway):
 1. **Deploy backend to Railway** (same as Option 1)
@@ -153,7 +153,7 @@ Your app uses Drizzle ORM with PostgreSQL. The database will be automatically se
 
 Most platforms provide free subdomains:
 - Railway: `your-app.railway.app`
-- Vercel: `your-app.vercel.app`
+- Netlify: `your-app.netlify.app`
 - Heroku: `your-app.herokuapp.com`
 
 ---
